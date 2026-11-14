@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Estrategia CI/CD Vuelos</title>
+<style>
+:root{
+  --paper:#f7f8fb;--card:#fff;--rule:#e3e7ee;--ink:#1d2433;--muted:#5b6474;
+  --ci:#5b2d8e;--cd:#2b4a8b;--plan:#5ba3cf;--test:#8dbb45;--db:#7a4fd6;--ok:#1f9d63;--warn:#d14b4b;--acc:#2f6fe4;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#141821;--card:#1c2230;--rule:#2b3344;--ink:#eef1f6;--muted:#a3acbd;
+  --ci:#8f62d0;--cd:#5b7fd0;--db:#a98bff;--ok:#43c98a;--warn:#ff7a7a;--acc:#6b9cff;}}
+:root[data-theme="dark"]{
+  --paper:#141821;--card:#1c2230;--rule:#2b3344;--ink:#eef1f6;--muted:#a3acbd;
+  --ci:#8f62d0;--cd:#5b7fd0;--db:#a98bff;--ok:#43c98a;--warn:#ff7a7a;--acc:#6b9cff;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:20px/1.4 system-ui,-apple-system,sans-serif;
+  background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);background-size:32px 32px}
+.slide{display:none;min-height:100vh;padding:28px 16px 90px;max-width:1200px;margin:0 auto}
+.slide.on{display:block}
+.slide.on .rise{animation:rise .6s ease both}
+.slide.on .rise:nth-child(2){animation-delay:.15s}.slide.on .rise:nth-child(3){animation-delay:.3s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+h1{font-size:clamp(28px,4.5vw,46px);margin:0 0 4px;line-height:1.1}
+.kicker{color:var(--muted);font:600 15px ui-monospace,Menlo,monospace;letter-spacing:.08em;text-transform:uppercase}
+.lead{font-size:clamp(18px,2.2vw,23px);color:var(--muted);margin:6px 0 20px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:16px;border-top:6px solid var(--c)}
+.card h3{margin:0 0 6px;font-size:23px}
+.card p{margin:4px 0;font-size:18px}
+.tag{display:inline-block;font:600 14px ui-monospace,Menlo,monospace;padding:2px 8px;border-radius:6px;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--c);margin:2px 4px 2px 0}
+.def{background:var(--card);border-left:6px solid var(--c);border-radius:8px;padding:12px 16px;margin:12px 0;font-size:19px}
+.def b{color:var(--c)}
+svg text{font-family:system-ui,sans-serif}
+.dot{offset-rotate:0deg;animation:mv var(--t,6s) linear infinite}
+@keyframes mv{from{offset-distance:0%}to{offset-distance:100%}}
+/* slide 2 */
+.loop-wrap{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;align-items:center}
+.lane{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 14px}
+.st{animation-duration:7s!important;background:var(--card);border:2px solid var(--rule);border-radius:9px;padding:6px 10px;font-size:16px;animation:lit 6s infinite;animation-delay:calc(var(--i)*1s)}
+.cd .st{animation-duration:6s}
+@keyframes lit{0%,14%{border-color:var(--c);background:color-mix(in srgb,var(--c) 22%,var(--card));transform:scale(1.07)}20%,100%{}}
+.gate{border-style:dashed}
+.why{font-size:17px;color:var(--muted);margin:0}
+/* slide 3 */
+.frame{width:100%;aspect-ratio:1040/540;max-width:1100px;margin:0 auto;border:1px solid var(--rule);border-radius:12px;background:#fff;overflow:hidden}
+.frame iframe{width:1200px;height:800px;border:0;transform-origin:0 0}
+.verdict{display:flex;gap:14px;align-items:center;background:var(--card);border:2px solid var(--ok);border-radius:14px;padding:14px 18px;margin:14px 0}
+.verdict .big{font-size:40px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.18)}}
+.verdict b{color:var(--ok)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mini{display:flex;align-items:center;gap:6px;font:600 14px ui-monospace,Menlo,monospace;flex-wrap:wrap;margin-top:8px}
+.mini span{padding:3px 8px;border-radius:6px;border:1px solid var(--rule)}
+.mini .g{animation:blink 1.6s steps(2) infinite;border-color:var(--warn);color:var(--warn)}
+@keyframes blink{50%{opacity:.35}}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;gap:8px;justify-content:center;align-items:center;padding:10px;background:color-mix(in srgb,var(--paper) 92%,transparent);border-top:1px solid var(--rule)}
+button{font:600 16px system-ui;padding:8px 14px;border-radius:8px;border:1px solid var(--rule);background:var(--card);color:var(--ink);cursor:pointer}
+.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--rule)}.dots i.on{background:var(--acc)}
+dialog{max-width:760px;width:calc(100% - 32px);max-height:85vh;border:1px solid var(--rule);border-radius:14px;background:var(--card);color:var(--ink);padding:20px 24px;font-size:17px}
+dialog::backdrop{background:rgb(0 0 0/.45)}
+dialog h2{margin:0 0 10px}dialog .x{float:right}
+details{border-bottom:1px solid var(--rule);padding:8px 0}
+summary{font-weight:700;cursor:pointer;color:var(--acc)}
+dialog li{margin:4px 0}
+@media (max-width:800px){.loop-wrap,.duo{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1 -->
+<section class="slide on">
+  <div class="kicker">1 / 3 · Repositorios y ramas</div>
+  <h1>4 repos, una sola forma de trabajar</h1>
+  <p class="lead">App de reserva de vuelos: Backend + Frontend + Infraestructura + Pruebas E2E.</p>
+  <div class="grid">
+    <div class="card rise" style="--c:var(--acc)">
+      <h3>⚙️ repo-backend</h3>
+      <p><b>API</b> de reservas, pruebas, Dockerfile y las <b>migraciones</b> de BD (Flyway).</p>
+      <span class="tag">api:1.4.0</span><span class="tag">V2__add_asiento.sql</span>
+    </div>
+    <div class="card rise" style="--c:var(--plan)">
+      <h3>🖥️ repo-frontend</h3>
+      <p>La <b>web</b> donde el cliente busca y paga.</p>
+      <span class="tag">web:2.1.0</span>
+    </div>
+    <div class="card rise" style="--c:var(--db)">
+      <h3>🏗️ repo-infra</h3>
+      <p><b>Terraform</b>: crea staging y producción iguales.</p>
+      <span class="tag">envs/staging</span><span class="tag">envs/prod</span>
+    </div>
+    <div class="card rise" style="--c:var(--test)">
+      <h3>🧪 repo-e2e</h3>
+      <p>Pruebas <b>de punta a punta</b> y smoke contra un ambiente desplegado.</p>
+      <span class="tag">reservar.spec.ts</span>
+    </div>
+  </div>
+  <div class="def" style="--c:var(--ok)"><b>GitHub Flow + tags:</b> <code>main</code> siempre desplegable. Cada cambio sale en una rama corta (<code>feature/*</code>, <code>fix/*</code>) y vuelve por PR en 1-2 días. Para salir a producción se pone un <b>tag</b> (<code>v1.4.0</code>) sobre main. Sin <code>develop</code> ni <code>release/*</code>.</div>
+  <svg viewBox="0 0 900 175" width="100%" role="img" aria-label="GitHub Flow: ramas cortas que vuelven a main, tags de versión sobre main">
+    <g font-size="15" font-weight="700" font-family="ui-monospace,Menlo,monospace">
+      <text x="0" y="65" fill="var(--ok)">main</text><text x="0" y="130" fill="var(--acc)">ramas</text>
+    </g>
+    <line x1="90" y1="60" x2="890" y2="60" stroke="var(--ok)" stroke-width="6"/>
+    <path d="M120 60 Q150 125 200 125 H260 Q300 125 320 60" fill="none" stroke="var(--acc)" stroke-width="4"/>
+    <path d="M360 60 Q390 125 440 125 H480 Q520 125 540 60" fill="none" stroke="var(--acc)" stroke-width="4"/>
+    <path d="M660 60 Q690 125 730 125 H760 Q790 125 810 60" fill="none" stroke="var(--warn)" stroke-width="4"/>
+    <circle r="8" fill="var(--acc)" class="dot" style="--t:3s;offset-path:path('M120 60 Q150 125 200 125 H260 Q300 125 320 60')"/>
+    <circle r="8" fill="var(--acc)" class="dot" style="--t:3s;animation-delay:1s;offset-path:path('M360 60 Q390 125 440 125 H480 Q520 125 540 60')"/>
+    <circle r="8" fill="var(--warn)" class="dot" style="--t:3s;animation-delay:2s;offset-path:path('M660 60 Q690 125 730 125 H760 Q790 125 810 60')"/>
+    <g font-size="14" font-weight="700">
+      <rect x="560" y="20" width="70" height="24" rx="6" fill="var(--ok)"/><text x="569" y="37" fill="#fff">v1.4.0</text>
+      <rect x="815" y="20" width="70" height="24" rx="6" fill="var(--ok)"/><text x="824" y="37" fill="#fff">v1.4.1</text>
+    </g>
+    <text x="175" y="155" font-size="14" fill="var(--muted)">feature/pagar</text>
+    <text x="410" y="155" font-size="14" fill="var(--muted)">feature/asiento</text>
+    <text x="700" y="155" font-size="14" fill="var(--muted)">fix/cobro-doble</text>
+  </svg>
+</section>
+
+<!-- SLIDE 2 -->
+<section class="slide">
+  <div class="kicker">2 / 3 · El ciclo CI/CD</div>
+  <h1>Un ciclo que nunca se detiene</h1>
+  <p class="lead">CI arma y prueba el código. CD lo lleva a los ambientes. Lo que se monitorea vuelve a planearse.</p>
+  <div class="loop-wrap">
+    <svg viewBox="0 0 640 330" width="100%" role="img" aria-label="Ciclo infinito: plan, code, build, test en CI; release, deploy, operate, monitor en CD">
+      <defs>
+        <path id="inf" d="M320 165 C390 60 600 50 600 165 C600 280 390 270 320 165 C250 60 40 50 40 165 C40 280 250 270 320 165 Z"/>
+      </defs>
+      <!-- CI loop (left) -->
+      <path d="M320 165 C250 60 40 50 40 165 C40 280 250 270 320 165" fill="none" stroke="var(--ci)" stroke-width="46"/>
+      <!-- CD loop (right) -->
+      <path d="M320 165 C390 60 600 50 600 165 C600 280 390 270 320 165" fill="none" stroke="var(--cd)" stroke-width="46"/>
+      <!-- crossing bands -->
+      <path d="M265 105 L375 225" stroke="var(--plan)" stroke-width="40"/>
+      <path d="M265 225 L375 105" stroke="var(--test)" stroke-width="40"/>
+      <g fill="#fff" font-weight="700" font-size="17" text-anchor="middle">
+        <text x="150" y="80">code</text>
+        <text x="40" y="165" transform="rotate(-90 40 165)" dy="6">build</text>
+        <text x="150" y="258">test</text>
+        <text x="488" y="80">release</text>
+        <text x="600" y="165" transform="rotate(90 600 165)" dy="6">deploy</text>
+        <text x="488" y="258">operate</text>
+        <text x="290" y="136" transform="rotate(47 290 136)">plan</text>
+        <text x="352" y="210" transform="rotate(47 352 210)">monitor</text>
+        <text x="320" y="170" transform="rotate(-47 320 170)" font-size="14">pruebas continuas</text>
+      </g>
+      <text x="165" y="175" font-size="44" font-weight="800" text-anchor="middle" fill="var(--ink)">CI</text>
+      <text x="475" y="175" font-size="44" font-weight="800" text-anchor="middle" fill="var(--ink)">CD</text>
+      <circle r="8" fill="#ffd23f" stroke="#fff" stroke-width="3" class="dot" style="--t:7s;offset-path:path('M320 165 C390 60 600 50 600 165 C600 280 390 270 320 165 C250 60 40 50 40 165 C40 280 250 270 320 165 Z')"/>
+      <circle r="8" fill="#ffd23f" stroke="#fff" stroke-width="3" class="dot" style="--t:7s;animation-delay:-3.5s;offset-path:path('M320 165 C390 60 600 50 600 165 C600 280 390 270 320 165 C250 60 40 50 40 165 C40 280 250 270 320 165 Z')"/>
+    </svg>
+    <div>
+      <div class="def" style="--c:var(--ci)"><b>CI</b> · en cada PR, en back y front</div>
+      <div class="lane" style="--c:var(--ci)">
+        <span class="st" style="--i:0">Lint</span><span class="st" style="--i:1">Unitarias y componentes</span><span class="st" style="--i:2">Integración con BD</span><span class="st" style="--i:3">Contrato (Pact)</span><span class="st gate" style="--i:4">Sonar gate</span><span class="st" style="--i:5">Escaneo</span><span class="st" style="--i:6">Imagen 1 vez</span>
+      </div>
+      <p class="why">No necesita ambiente: el error se atrapa en el PR, en minutos.</p>
+      <div class="def cd" style="--c:var(--cd)"><b>CD</b> · merge a main → staging · tag + aprobación → producción</div>
+      <div class="lane cd" style="--c:var(--cd)">
+        <span class="st" style="--i:0">Migrar BD (expand)</span><span class="st" style="--i:1">Staging</span><span class="st" style="--i:2">E2E + smoke</span><span class="st gate" style="--i:3">✋ Aprobar</span><span class="st" style="--i:4">Canary</span><span class="st" style="--i:5">Monitorear / rollback</span>
+      </div>
+      <p class="why">Necesita un ambiente real con BD, backend y frontend juntos.</p>
+      <div class="def" style="--c:var(--ok)"><b>Se construye una sola vez:</b> la imagen <code>api@sha256:…</code> que pasó staging es la misma que se etiqueta <code>1.4.0</code> y se promueve a producción. No hay un segundo build.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3 -->
+<section class="slide">
+  <div class="kicker">3 / 3 · Nuestra decisión</div>
+  <h1>Entrega continua, no despliegue continuo</h1>
+  <div class="verdict rise"><span class="big">✋</span><div>Todo llega <b>solo hasta staging</b>. A producción pasa cuando una persona lo <b>aprueba</b>.</div></div>
+  <div class="frame rise" id="fr"><iframe src="escenario.html" title="Escenario de la app de vuelos" scrolling="no"></iframe></div>
+  <div class="duo" style="margin-top:14px">
+    <div class="card rise" style="--c:var(--warn)">
+      <h3>Despliegue continuo</h3>
+      <p>Pasa las pruebas y sale <b>solo</b> a producción.</p>
+      <div class="mini"><span>CI</span>→<span>staging</span>→<span>prod</span></div>
+    </div>
+    <div class="card rise" style="--c:var(--ok)">
+      <h3>Entrega continua ✅</h3>
+      <p>Queda <b>listo</b>; alguien da el último clic.</p>
+      <div class="mini"><span>CI</span>→<span>staging</span>→<span class="g">✋</span>→<span>prod</span></div>
+    </div>
+  </div>
+  <div class="grid" style="margin-top:14px">
+    <div class="card" style="--c:var(--cd)"><p>💳 Hay <b>pagos y reservas</b>: un error cuesta dinero.</p></div>
+    <div class="card" style="--c:var(--db)"><p>🗄️ Un cambio de <b>base de datos</b> no siempre se revierte fácil.</p></div>
+    <div class="card" style="--c:var(--ok)"><p>🐤 Salimos con <b>canary</b> (5%) y <b>rollback</b> automático si suben los errores.</p></div>
+  </div>
+</section>
+
+<nav>
+  <button id="prev" aria-label="Anterior">◀</button>
+  <div class="dots"><i></i><i></i><i></i></div>
+  <button id="next" aria-label="Siguiente">▶</button>
+  <button id="theme" aria-label="Cambiar tema">◐</button>
+  <button id="faq" aria-label="Ver respuestas">💡 Respuestas</button>
+</nav>
+
+<dialog id="ans">
+  <button class="x" onclick="ans.close()" aria-label="Cerrar">✕</button>
+  <h2>Respuestas rápidas</h2>
+  <details open><summary>1. ¿Cuántos repositorios y qué versiona cada uno?</summary>
+    <p>4 repos: <b>repo-backend</b> la API + pruebas + Dockerfile + migraciones (Flyway); <b>repo-frontend</b> la web; <b>repo-infra</b> el Terraform de staging y producción; <b>repo-e2e</b> las pruebas de punta a punta.</p>
+    <p><b>Por qué las migraciones van con el backend:</b> la versión X del API necesita el esquema Y. En el mismo repo viajan juntas y no hay que coordinar dos pipelines. Un repo de BD aparte solo compensa si varios servicios comparten la BD.</p>
+    <p><b>Costo:</b> coordinar front y back (lo cubre el contrato con Pact). Alternativa: monorepo, más fácil de coordinar pero con pipelines más pesados.</p></details>
+  <details><summary>2. ¿Qué estrategia de ramificación?</summary>
+    <p><b>GitHub Flow + tags</b>: <code>main</code> siempre desplegable; ramas cortas (<code>feature/*</code>, <code>fix/*</code>) que vuelven por PR en 1-2 días; un tag semver (<code>v1.4.0</code>) marca qué sale a producción. Un error urgente es otra rama corta desde main.</p>
+    <p><b>Por qué:</b> se integra a main todos los días, que es lo que pide CI. El control de la salida ya lo dan el tag y la aprobación manual, así que una rama <code>release/*</code> sobraría. <b>Costo:</b> main debe estar siempre verde; lo sin terminar se esconde con feature flags. Alternativa: GitFlow, con más control por versión pero integración menos frecuente.</p></details>
+  <details><summary>3. ¿Qué pipelines y en qué repos?</summary>
+    <p>Back y front tienen <b>su pipeline de CI</b> en cada PR (GitHub Actions). El <b>pipeline de CD</b> despliega a staging en cada merge a <code>main</code>, y a producción cuando hay tag y alguien aprueba (GitHub Environments). repo-infra corre <code>terraform plan</code> en el PR y <code>apply</code> al hacer merge. repo-e2e lo invoca el CD contra staging.</p>
+    <p>Las migraciones corren <b>antes</b> de desplegar el backend, en el mismo pipeline.</p></details>
+  <details><summary>4. ¿Qué etapas en CI, cuáles en CD y por qué?</summary>
+    <p><b>CI:</b> lint → unitarias (y de componentes en el front) → integración con BD (Testcontainers) → contrato (Pact) → quality gate de Sonar → escaneo de seguridad (SAST, dependencias) → build y publicar imagen. No necesitan ambiente desplegado: el error se atrapa en el PR (<i>fail fast</i>).</p>
+    <p><b>CD:</b> migrar BD (expand) → deploy a staging → E2E y smoke → aprobación manual → canary 5% → monitoreo con rollback automático. Necesitan un ambiente real con todo integrado.</p>
+    <p><b>Regla clave:</b> se construye <b>una sola vez</b>. La imagen que pasó staging (mismo digest) es la que se etiqueta y va a producción.</p></details>
+  <details><summary>5. ¿Despliegue continuo o entrega continua?</summary>
+    <p><b>Entrega continua.</b> Todo queda listo para producción, pero una persona aprueba el último paso. Razones: hay pagos, las migraciones de BD no siempre se revierten, y el error en reservas cuesta dinero.</p>
+    <p>Para bajar el riesgo: canary + rollback automático si suben los errores.</p></details>
+  <h3>Definiciones de bolsillo</h3>
+  <ul>
+    <li><b>CI:</b> integrar el código a main varias veces al día, validado por build y pruebas automáticas.</li>
+    <li><b>Entrega continua:</b> cada cambio queda listo para producción; salir es decisión humana.</li>
+    <li><b>Despliegue continuo:</b> cada cambio que pasa las pruebas sale solo a producción.</li>
+    <li><b>Artefacto:</b> el resultado del build (imagen Docker, .jar) con versión, inmutable.</li>
+    <li><b>Canary:</b> la nueva versión le llega primero a un % pequeño de usuarios.</li>
+    <li><b>Blue-green:</b> dos ambientes iguales; se cambia el tráfico de uno al otro de golpe.</li>
+    <li><b>Rollback:</b> volver a la versión estable anterior.</li>
+    <li><b>Expand/contract:</b> migrar la BD en pasos compatibles para que la versión vieja siga funcionando. Es lo que permite el rollback con migraciones.</li>
+    <li><b>Prueba de contrato:</b> verifica que front y back cumplen el mismo acuerdo de API sin desplegar nada (Pact).</li>
+    <li><b>Quality gate:</b> regla que bloquea el PR si baja la cobertura o aparecen bugs (Sonar).</li>
+    <li><b>Feature flag:</b> activar o apagar una funcionalidad sin redesplegar.</li>
+    <li><b>Métricas DORA:</b> frecuencia de despliegue, lead time, tasa de fallos y tiempo de recuperación.</li>
+  </ul>
+</dialog>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')],dots=[...document.querySelectorAll('.dots i')];let s=0;
+function go(n){s=Math.max(0,Math.min(2,n));slides.forEach((x,i)=>x.classList.toggle('on',i===s));dots.forEach((d,i)=>d.classList.toggle('on',i===s));fit()}
+function fit(){const f=document.getElementById('fr');if(f.offsetWidth)f.firstElementChild.style.transform=`scale(${f.offsetWidth/1040}) translate(-80px,-140px)`}
+prev.onclick=()=>go(s-1);next.onclick=()=>go(s+1);
+document.onkeydown=e=>{if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();go(s+1)}if(['ArrowLeft','PageUp'].includes(e.key))go(s-1)};
+theme.onclick=()=>{const r=document.documentElement,d=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=d?'light':'dark'};
+faq.onclick=()=>ans.showModal();
+addEventListener('resize',fit);go(0);
+</script>
+</body>
+</html>

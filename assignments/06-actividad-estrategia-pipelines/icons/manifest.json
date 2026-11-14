@@ -1,0 +1,78 @@
+{
+  "github": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/github_light.svg",
+    "file": "github.svg",
+    "bytes": 997,
+    "dark_file": "github_dark.svg",
+    "dark_url": "https://svgl.app/library/github_dark.svg"
+  },
+  "actions": {
+    "source": "devicon",
+    "url": "https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg",
+    "file": "actions.svg",
+    "bytes": 2854
+  },
+  "docker": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/docker.svg",
+    "file": "docker.svg",
+    "bytes": 1488
+  },
+  "postgresql": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/postgresql.svg",
+    "file": "postgresql.svg",
+    "bytes": 3944
+  },
+  "react": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/react_light.svg",
+    "file": "react.svg",
+    "bytes": 6534,
+    "dark_file": "react_dark.svg",
+    "dark_url": "https://svgl.app/library/react_dark.svg"
+  },
+  "nodejs": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/nodejs.svg",
+    "file": "nodejs.svg",
+    "bytes": 2491
+  },
+  "approve": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/user-check.svg",
+    "file": "approve.svg",
+    "bytes": 406
+  },
+  "staging": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/flask-conical.svg",
+    "file": "staging.svg",
+    "bytes": 464
+  },
+  "prod": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/plane.svg",
+    "file": "prod.svg",
+    "bytes": 494
+  },
+  "migr": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/database-zap.svg",
+    "file": "migr.svg",
+    "bytes": 476
+  },
+  "terraform": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/terraform.svg",
+    "file": "terraform.svg",
+    "bytes": 333
+  },
+  "playwright": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/playwright.svg",
+    "file": "playwright.svg",
+    "bytes": 5032
+  }
+}

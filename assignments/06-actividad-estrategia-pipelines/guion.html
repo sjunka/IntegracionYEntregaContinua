@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guion de exposición</title>
+<style>
+body{margin:0;background:#f7f8fb;color:#1d2433;font:19px/1.55 system-ui,-apple-system,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+h1{margin:0 0 4px}.sub{color:#5b6474;margin:0 0 20px}
+section{display:grid;grid-template-columns:1fr 1.1fr;gap:20px;background:#fff;border:1px solid #e3e7ee;border-radius:14px;padding:18px;margin-bottom:20px}
+img{width:100%;border:1px solid #e3e7ee;border-radius:8px}
+h2{margin:0 0 6px;font-size:24px}.time{font:600 14px ui-monospace,Menlo,monospace;color:#2f6fe4}
+.say{border-left:5px solid #1f9d63;padding:2px 12px;margin:10px 0}
+.point{color:#5b6474;font-size:16px}
+.q{background:#fff7ec;border-left:5px solid #e07a1f;padding:8px 12px;border-radius:6px;font-size:16px;margin-top:10px}
+.who{display:inline-block;font:700 13px ui-monospace,Menlo,monospace;padding:1px 8px;border-radius:5px;color:#fff;margin-right:6px}.S{background:#2f6fe4}.V{background:#b0397a}
+.say.v{border-left-color:#b0397a}
+@media (max-width:800px){section{grid-template-columns:1fr}}
+@media print{section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<main>
+<h1>Guion · Estrategia CI/CD app de vuelos</h1>
+<p class="sub">Unos 5 minutos en total, entre <span class="who S">Sergio</span> y <span class="who V">Valeria</span>. Cada bloque dice quién habla; lo gris señala qué mostrar en la diapo. Las preguntas las responde quien tenga esa parte.</p>
+
+<section>
+  <img src="capturas/slide1.png" alt="Diapositiva 1: repos y ramas">
+  <div>
+    <div class="time">DIAPO 1 · ~1:30 min · Sergio</div>
+    <h2>Repos y ramas</h2>
+    <p class="say"><span class="who S">Sergio</span>"Usamos cuatro repositorios: backend, frontend, infraestructura y pruebas de punta a punta."</p>
+    <p class="point">Señalar las 4 tarjetas.</p>
+    <p class="say"><span class="who S">Sergio</span>"El backend guarda también las <b>migraciones</b> de base de datos, que aplica Flyway en orden. Van juntas porque la versión del API depende de la versión del esquema. El de <b>infraestructura</b> tiene el Terraform que crea staging y producción iguales. Y el de <b>E2E</b> tiene las pruebas que corren contra un ambiente desplegado."</p>
+    <p class="say"><span class="who S">Sergio</span>"Así cada parte tiene su pipeline. El costo es coordinar front y back, y eso lo cubren las pruebas de contrato."</p>
+    <p class="point">Señalar el dibujo de ramas.</p>
+    <p class="say"><span class="who S">Sergio</span>"Para ramificar usamos <b>GitHub Flow con tags</b>. <b>main</b> siempre está lista para desplegar. Cada cambio sale en una rama corta y vuelve por pull request en uno o dos días. Cuando queremos salir a producción, ponemos un tag sobre main, por ejemplo v1.4.0."</p>
+    <div class="q"><b>Si preguntan "¿por qué no GitFlow?":</b> "Porque develop y las ramas release hacen que integremos menos seguido. El control de la salida ya lo dan el tag y la aprobación manual, así que una rama release no agrega nada."</div>
+  </div>
+</section>
+
+<section>
+  <img src="capturas/slide2.png" alt="Diapositiva 2: ciclo CI/CD">
+  <div>
+    <div class="time">DIAPO 2 · ~1:30 min · Valeria</div>
+    <h2>El ciclo y las etapas</h2>
+    <p class="say v"><span class="who V">Valeria</span>"Este es el ciclo de CI/CD. A la izquierda está la integración continua y a la derecha la entrega. Nunca se detiene: lo que monitoreamos en producción vuelve a convertirse en plan."</p>
+    <p class="point">Señalar los puntos amarillos que recorren el ciclo.</p>
+    <p class="say v"><span class="who V">Valeria</span>"Backend y frontend tienen su <b>pipeline de CI</b>, que corre en cada push y pull request: lint, pruebas unitarias y de componentes, integración con la base de datos, pruebas de contrato con Pact, el quality gate de Sonar, escaneo de seguridad y publicar la imagen. Va en CI porque nada de eso necesita un ambiente desplegado: el error se atrapa en el pull request."</p>
+    <p class="say v"><span class="who V">Valeria</span>"El <b>pipeline de CD</b> toma esa misma imagen. Primero migra la base de datos, despliega en staging y corre las pruebas de punta a punta. Después alguien aprueba, sale a producción con canary y lo monitoreamos. Va en CD porque necesita un ambiente real con todo junto."</p>
+    <p class="say v"><span class="who V">Valeria</span>"Lo que entra a main va a staging. Lo que tiene tag puede ir a producción."</p>
+    <div class="q"><b>Si preguntan "¿por qué el contrato en CI y no en staging?":</b> "Pact corre sin desplegar nada. Si lo dejamos para staging, el error aparece después de desplegar, cuando ya es más caro."</div>
+    <div class="q"><b>Si preguntan "¿por qué migrar la BD primero?":</b> "Porque el backend nuevo necesita el esquema nuevo. Hacemos migraciones compatibles hacia atrás (expand/contract) para que la versión vieja siga funcionando mientras conviven."</div>
+    <div class="q"><b>Si preguntan "¿se construye en cada ambiente?":</b> "No. Se construye una sola vez. La imagen que pasó staging, con el mismo digest, es la que se etiqueta y va a producción. Así lo que probamos es exactamente lo que sale."</div>
+  </div>
+</section>
+
+<section>
+  <img src="capturas/slide3.png" alt="Diapositiva 3: decisión y escenario">
+  <div>
+    <div class="time">DIAPO 3 · ~2 min · Sergio y Valeria</div>
+    <h2>La decisión</h2>
+    <p class="say"><span class="who S">Sergio</span>"Nuestra respuesta: <b>entrega continua</b>, no despliegue continuo. Todo llega solo hasta staging, y a producción pasa cuando una persona lo aprueba."</p>
+    <p class="point">Recorrer el diagrama de izquierda a derecha.</p>
+    <p class="say"><span class="who S">Sergio</span>"Así se ve el escenario completo: el repo de infraestructura crea staging y producción con Terraform. Backend y frontend alimentan GitHub Actions, que construye la imagen y la guarda en el registry. De ahí se despliega sola a staging. El repo de E2E corre sus pruebas contra staging. Si pasan, alguien aprueba y sale a producción. El viajero solo ve producción."</p>
+    <p class="say"><span class="who S">Sergio</span>"PostgreSQL queda aparte porque no es un paso del pipeline: son los datos reales y no se redespliegan. El pipeline solo le aplica las migraciones, que es la línea punteada."</p>
+    <p class="point">Señalar las dos tarjetas de comparación.</p>
+    <p class="say v"><span class="who V">Valeria</span>"¿Por qué con aprobación? Por tres razones. Hay pagos y reservas, así que un error cuesta dinero. Los cambios de base de datos no siempre se pueden revertir. Y aun así bajamos el riesgo: salimos con canary al 5% de usuarios y hay rollback automático si suben los errores."</p>
+    <p class="say v"><span class="who V">Valeria</span>"Esa es nuestra estrategia. ¿Preguntas?"</p>
+    <div class="q"><b>Si preguntan "¿qué es canary?":</b> "La versión nueva le llega primero a un grupo pequeño de usuarios. Si las métricas están bien, se amplía; si no, se devuelve."</div>
+    <div class="q"><b>Si preguntan "¿y blue-green?":</b> "Son dos ambientes iguales y se cambia todo el tráfico de uno al otro de golpe. Elegimos canary porque limita el daño a pocos usuarios."</div>
+  </div>
+</section>
+</main>
+</body>
+</html>
