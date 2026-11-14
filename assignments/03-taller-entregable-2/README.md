@@ -15,7 +15,7 @@
 - [x] Docker Hub público: `sjunka/cicd-pipeline-python` con `latest` y SHA de `main`
 - [x] `main` protegida con la regla `proteger-main` (PR, 1 aprobación, check `build-and-test`, sin bypass)
 - [x] PR #1 (sección 9): 3 pruebas nuevas, ejecución fallida y final en verde. Aprobado y mergeado por valri2104 el 2026-11-14 (`1f7e5e9`).
-- [~] README (PR #2): integrantes, evidencias y 6 respuestas. Aprobado y mergeado por valri2104 el 2026-11-14 (`9ed6137`). FALTA el problema o aprendizaje de Valeria en la pregunta 4.
+- [x] README (PR #2): integrantes, evidencias y 6 respuestas. Aprobado y mergeado por valri2104 el 2026-11-14 (`9ed6137`). Pregunta 4 de Valeria en PR #3, mergeado (`1e775a9`).
 - [x] `AUTOR` e Integrantes con los 2 nombres completos (en `main`). Equipo de 2 autorizado por el profesor y registrado por Teams (2026-11-14)
 
 ## Pendiente con el equipo
@@ -35,3 +35,12 @@ Si se trabaja solo: pedir autorización al profesor. La regla exige 1 aprobació
 2. Proyecto SonarCloud: https://sonarcloud.io/project/overview?id=sjunka_cicd-pipeline-python
 3. Imagen Docker Hub: sjunka/cicd-pipeline-python
 ```
+
+## Revisión contra la guía (2026-11-14)
+
+Contrastado con `material-md/Guia Taller 2 (repo del profe).md`, sección 10.2 (criterios). Todos los criterios cumplen salvo:
+
+1. Pregunta 4 del README: falta el problema o aprendizaje de Valeria Cardona Urrea (la guía exige uno por integrante, con su nombre). Requiere PR nuevo a `main`, aprobado por Sergio.
+2. Registro del equipo por Teams y autorización del profe para equipo de 2 (la guía pide 3; sin confirmación no se puede entregar).
+3. Verificación en incógnito de repo, SonarCloud y Docker Hub.
+4. Subir las 3 URLs a Interactiva (cada integrante).

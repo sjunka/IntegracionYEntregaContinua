@@ -2,6 +2,15 @@
 
 Formato: `- <qué pasó> -> <qué hacer la próxima vez>`. Más recientes arriba. Se actualiza con `/cp`.
 
+## 2026-11-14 - Diapos Unidad 2 y 3, revisión del Taller 2
+
+- Las diapos solo dan el resumen del taller; los criterios reales están en la guía del repo del profe (`Taller-Entregable-2.md`, `Taller-Entregable3.md` en raw.githubusercontent.com/danielr9911/cicd-workshops/main/) -> bajar la guía y revisar contra su sección "Criterios de evaluación"; copias en `material-md/Guia Taller N (repo del profe).md`.
+- Las diapos traen fechas de la cohorte anterior (Taller 2 "18 de abril") -> no actualizar `board.md` con ellas salvo que coincidan con el calendario 2026-11 (Taller 3 15 nov y proyecto 21 nov sí coinciden).
+- Las rúbricas `Rubrica_Taller_2.md` y `Rubrica_Taller_3.md` no están en el repo público (404) -> pedirlas al profe o a Interactiva.
+- Verificar el estado real por API antes de afirmar "listo" -> `gh run list`, `gh pr list`, `gh api .../rulesets`, SonarCloud `api/qualitygates/project_status` y `api/measures/component`, Docker Hub `v2/repositories/<user>/<repo>/tags`.
+- En zsh `echo =====` falla (`==== not found`) y corta el comando -> usar `echo ---` o no usar echo.
+- Taller 2: la guía exige que CADA integrante escriba su problema/aprendizaje con su nombre en la pregunta 4; faltaba el de Valeria -> pedirlo temprano, es el punto que más fácil se pierde.
+
 ## 2026-11-14 - Dictado de clase (contenedores, K8s, serverless, GitOps)
 
 - Sergio dicta en ráfagas cortas con muchos errores de tipeo -> anotar cada ráfaga al final de la sección en curso, mostrar la interpretación en 1-2 líneas y marcar las dudosas (ej. "servers mtml" = `serverless.yml`).
