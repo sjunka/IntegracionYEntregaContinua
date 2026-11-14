@@ -190,6 +190,285 @@ Cómo funciona:
 > - Herramientas: Argo Rollouts, Flagger, AWS App Mesh / pesos en target groups de un ALB, Istio.
 > - Trade-off frente a blue-green: no duplica toda la infraestructura y limita más el blast radius, pero exige buen monitoreo y es más lento llegar al 100%.
 
+#### Feature flags
+
+Técnica que permite activar o desactivar funcionalidades. El código fluye con condicionales; el estado (activado / desactivado) se gestiona a través de un sistema de configuración externo.
+
+Ventajas:
+
+- Desacoplar el despliegue del lanzamiento.
+- Testing en producción controlado.
+- Lanzamientos graduales en segmentos.
+- Kill switch.
+- Se puede combinar con canary.
+
+> **Complemento**
+>
+> - Ejemplo mínimo:
+>
+>   ```python
+>   if flags.is_enabled("nuevo_checkout", usuario):
+>       return checkout_v2(carrito)
+>   return checkout_v1(carrito)
+>   ```
+>
+> - Separa **desplegar** (el código llega a producción apagado) de **liberar** (encender la funcionalidad). Rollback = apagar el flag, sin redesplegar.
+> - Permite canary por usuario (encender para el 5%, para empleados, por país) y A/B testing.
+> - Herramientas: LaunchDarkly, Unleash, Flagsmith, AWS AppConfig; en lo más simple, una variable de entorno.
+> - Trade-off: deuda técnica; los flags viejos llenan el código de `if` y hay que borrarlos cuando la funcionalidad queda al 100%. Cada flag duplica las combinaciones a probar.
+
+### Rollback automatizado
+
+La red de seguridad final.
+
+Disparadores:
+
+- Fallos de los smoke tests.
+- Alertas críticas en el monitoreo.
+- Degradación de métricas de negocio.
+- Disparo manual a través de herramientas de CD.
+
+Mecanismos: blue-green, rolling update, canary, serverless.
+
+> **Complemento**
+>
+> - Qué es: el sistema detecta que un despliegue salió mal y vuelve solo a la última versión estable, sin intervención humana.
+> - Cómo funciona:
+>   1. Se despliega la versión nueva y se guarda la referencia a la anterior (tag de imagen Docker, release o commit).
+>   1. Se vigilan métricas y health checks: tasa de errores 5xx, latencia, `/health`.
+>   1. Si una métrica pasa el umbral en la ventana definida (ej. más de 5% de errores en 5 minutos), el pipeline revierte solo.
+>   1. Se avisa al equipo para que analice qué pasó.
+> - Por qué es la red de seguridad final: blue-green, canary y feature flags reducen el riesgo pero no lo eliminan; el rollback limita el daño cuando algo se escapa.
+> - Disparadores, en detalle:
+>   - Smoke tests: el más rápido; si `/health` no responde 200 o falla el login tras desplegar, se revierte de inmediato.
+>   - Alertas críticas: 5xx sobre el umbral, latencia p99 disparada, reinicios de pods (Prometheus, Datadog, CloudWatch).
+>   - Métricas de negocio: la app funciona pero bajan conversiones, pagos o registros. El más difícil de detectar, porque no hay error técnico visible.
+>   - Manual: una persona revierte con un botón o comando (Argo CD, Jenkins, GitHub Actions, Spinnaker). Cubre lo que las métricas no ven.
+> - Mecanismos, en detalle:
+>   - Blue-green: el balanceador o DNS vuelve a apuntar a Blue, que sigue vivo. Casi instantáneo.
+>   - Rolling update: otro rolling hacia la versión anterior (`kubectl rollout undo deployment/app`). Más lento; conviven las dos versiones durante el proceso.
+>   - Canary: el tráfico del canary vuelve a 0% y se elimina. Afecta a pocos usuarios; lo automatizan Argo Rollouts o Flagger.
+>   - Serverless: cada despliegue crea una versión inmutable de la función y un alias apunta a la activa; revertir es mover el alias a la versión anterior (AWS Lambda + CodeDeploy). Instantáneo.
+>   - Más rápidos: blue-green y serverless, porque solo cambian un puntero; el más lento es rolling update.
+> - Otros ejemplos: `helm rollback app 0` (0 = revisión anterior); AWS CodeDeploy / ECS revierte solo cuando falla una alarma de CloudWatch.
+> - Cuidado clave, la base de datos: si el despliegue cambió el esquema, revertir el código no basta. Las migraciones deben ser compatibles hacia atrás (patrón *expand/contract*); si no, el rollback deja la app rota.
+
+### Observabilidad
+
+Necesidad: tiempo para detectar problemas; necesitamos feedback rápido y fiable.
+
+- Es la base para validar el éxito del despliegue.
+- Permite tomar decisiones informadas.
+- Va más allá del monitoreo básico: no solo saber qué falla, sino por qué falla.
+
+Pilares: logs, métricas, tracing distribuido.
+
+Las métricas pueden ser: latencia, tráfico, errores, saturación (CPU, memoria, red, colas).
+
+Herramientas:
+
+- Recolección / métricas: Prometheus, Telegraf.
+- Almacenamiento: CloudWatch.
+- Visualización: Grafana, Datadog, Dynatrace, CloudWatch.
+
+> **Complemento**
+>
+> - Los tres pilares responden preguntas distintas: **métricas** = ¿algo anda mal? (números en el tiempo: errores/s, latencia p99, CPU); **logs** = ¿qué pasó? (eventos con detalle); **traces** = ¿dónde se demoró o falló? (el recorrido de una petición a través de varios microservicios).
+> - Herramientas por pilar: logs con ELK/OpenSearch o Loki; tracing con Jaeger, Zipkin, AWS X-Ray; OpenTelemetry es el estándar abierto para instrumentar los tres.
+> - Relación con CD: la observabilidad alimenta los disparadores del rollback automatizado y el avance del canary (5% -> 25% solo si las métricas están bien). Sin ella, esas estrategias son a ciegas.
+> - Métricas típicas de un despliegue: las *golden signals* de Google SRE (latencia, tráfico, errores, saturación). A nivel de proceso, las métricas DORA (frecuencia de despliegue, lead time, tasa de fallos de cambio, tiempo de recuperación), tema del foro de la entrega 4.
+> - Trade-off: instrumentar y guardar logs/traces cuesta (almacenamiento y licencias como Datadog); se usa muestreo en traces y retención limitada de logs.
+
+### Definiendo Continuous Delivery (entrega continua)
+
+Es una práctica donde los cambios que pasan la fase de CI son automáticamente desplegados en un entorno similar a producción.
+
+Objetivo: asegurar que siempre tengamos una versión del software probada, lista para liberar con mínima preparación y riesgo.
+
+Clave: el despliegue final al entorno de producción no es automático; requiere aprobación manual.
+
+> **Complemento**
+>
+> - En GitHub Actions: el job `deploy-staging` corre solo tras CI; el job `deploy-prod` usa `environment: production` con *required reviewers*, y queda en pausa hasta que alguien aprueba.
+> - Por qué una empresa elige aprobación manual: regulación (banca, salud), ventanas de cambio acordadas con el negocio, o coordinar con marketing/soporte el momento de liberar.
+> - Trade-off: más control, pero el aprobador puede volverse cuello de botella y los cambios se acumulan en lotes más grandes (más riesgo por lanzamiento).
+
+### CD con contenedores Docker
+
+Los contenedores son un pilar de CI/CD.
+
+- La imagen es un artefacto inmutable y autocontenido: empaqueta la app, sus dependencias y la configuración del entorno.
+- Resultado: despliegues más fiables y consistentes entre ambientes.
+
+Registro de contenedores: herramienta para almacenar y versionar las imágenes.
+
+- La imagen (el artefacto de Docker) es la fuente de verdad del despliegue.
+- El registro almacena la imagen de Docker que luego se despliega en los diferentes ambientes (pruebas, staging, producción).
+
+> **Complemento**
+>
+> - Ejemplo de flujo: CI hace `docker build -t api:1.4.0 .` y `docker push <registro>/api:1.4.0`. El CD no vuelve a construir: hace `docker pull` de esa misma imagen en staging y luego en producción ("build once, deploy many").
+> - Registros reales: Docker Hub, Amazon ECR, GitHub Container Registry (ghcr.io), Google Artifact Registry, Harbor. En el Taller 3 se usa Docker Hub/ECR con ECS.
+> - Inmutable de verdad = referenciar por digest (`api@sha256:...`), no solo por tag: un tag como `latest` o `1.4.0` se puede sobrescribir. Así se garantiza que lo que pasó staging es exactamente lo que va a producción (punto que usamos en la actividad de pipelines).
+> - "Configuración del entorno" con matiz: la imagen trae el runtime y dependencias, pero lo que cambia por ambiente (URL de BD, secretos) se inyecta al arrancar con variables de entorno o un gestor de secretos. Si se mete en la imagen, habría que construir una por ambiente y se rompe "build once".
+> - El registro también es punto de control de seguridad: escaneo de vulnerabilidades (Trivy, ECR scan) antes de promover la imagen.
+> - Trade-off: imágenes grandes hacen lentos el push y el despliegue; se mitiga con imágenes base `slim`/`alpine` y builds multi-etapa.
+
+Cómo se ve el pipeline:
+
+1. CI construye la imagen con `docker build`.
+2. CI sube la imagen al registro con `docker push`.
+3. El pipeline de CD usa la nueva imagen.
+4. CD obtiene la imagen (`docker pull`) y la despliega.
+
+> **Complemento**
+>
+> Ejemplo en GitHub Actions (resumido):
+>
+> ```yaml
+> jobs:
+>   ci:
+>     runs-on: ubuntu-latest
+>     steps:
+>       - uses: actions/checkout@v4
+>       - run: docker build -t ghcr.io/equipo/api:${{ github.sha }} .
+>       - run: docker push ghcr.io/equipo/api:${{ github.sha }}
+>   deploy-staging:
+>     needs: ci
+>     environment: staging
+>     steps:
+>       - run: docker pull ghcr.io/equipo/api:${{ github.sha }}   # misma imagen, sin rebuild
+>       - run: ./deploy.sh staging ghcr.io/equipo/api:${{ github.sha }}
+>   deploy-prod:
+>     needs: deploy-staging
+>     environment: production   # required reviewers = aprobación manual (entrega continua)
+>     steps:
+>       - run: ./deploy.sh prod ghcr.io/equipo/api:${{ github.sha }}
+> ```
+>
+> - El tag con el SHA del commit hace trazable qué código corre en cada ambiente.
+> - En ECS/Kubernetes el "pull" lo hace el orquestador: el CD solo actualiza la definición de tarea o el `Deployment` con la nueva imagen.
+
+### Kubernetes
+
+Es la plataforma destino que recibe las instrucciones de despliegue del pipeline de CD. Se encarga de:
+
+- Iniciar contenedores basados en la nueva imagen.
+- Gestionar el ciclo de vida de los pods o contenedores.
+- Manejar el enrutamiento de red (Services).
+- Realizar el escalado.
+- Implementar la estrategia de despliegue definida (rolling update por defecto).
+
+> **Complemento**
+>
+> - Es un orquestador de contenedores: uno le declara el estado deseado ("3 réplicas de `api:1.4.0`") y él trabaja para mantenerlo; si un pod muere, crea otro.
+> - Piezas básicas: **Pod** (uno o más contenedores juntos, la unidad mínima), **Deployment** (cuántas réplicas y qué imagen; hace el rolling update), **Service** (IP/nombre estable que reparte tráfico entre pods), **Ingress** (entrada HTTP desde fuera), **HPA** (escalado automático por CPU o métricas).
+> - Lo que hace el CD: `kubectl set image deployment/api api=ghcr.io/equipo/api:1.4.0` o aplicar un manifiesto/Helm chart. Con GitOps (Argo CD, Flux) el pipeline solo cambia el tag en un repo y Kubernetes se sincroniza.
+> - Rolling update: reemplaza pods de a poco (`maxSurge`, `maxUnavailable`) y solo manda tráfico a los nuevos cuando pasan la `readinessProbe`. `kubectl rollout undo` hace el rollback. Canary o blue-green requieren herramientas extra (Argo Rollouts, Flagger) o un service mesh.
+> - Versiones gestionadas: EKS (AWS), GKE (Google), AKS (Azure). Alternativa más simple en AWS: ECS, la que usa el Taller 3.
+> - Trade-off: muy potente, pero complejo de operar; para una o dos apps pequeñas, ECS, Cloud Run o App Runner suelen bastar.
+
+Interacción pipeline - Kubernetes:
+
+- El pipeline se autentica con el clúster de Kubernetes (k8s).
+- Utiliza `kubectl` o herramientas similares para aplicar los cambios en los Deployments.
+
+> **Complemento**
+>
+> - Autenticación en GitHub Actions con EKS: OIDC (`aws-actions/configure-aws-credentials` con un rol IAM, sin llaves guardadas) y luego `aws eks update-kubeconfig`. Evitar guardar un `kubeconfig` con credenciales largas como secreto.
+> - Comandos típicos: `kubectl apply -f k8s/` (manifiestos), `kubectl set image deployment/api api=<imagen>:<tag>`, `kubectl rollout status deployment/api` (espera y falla el job si el rollout no termina), `kubectl rollout undo deployment/api` (rollback).
+> - "Similares": Helm (`helm upgrade --install api ./chart --set image.tag=1.4.0`) y Kustomize, para variar la config por ambiente sin duplicar manifiestos.
+> - Modelo push vs pull: aquí el pipeline empuja cambios al clúster (push). Con GitOps (Argo CD, Flux) el clúster jala los cambios desde un repo y el pipeline no necesita credenciales del clúster: menos superficie de ataque.
+> - Seguridad: la cuenta del pipeline debe tener permisos RBAC mínimos (solo actualizar Deployments en su namespace).
+
+### CD con serverless
+
+Functions as a Service (FaaS): no gestionamos servidores.
+
+- Desplegamos paquetes de código (funciones) y la configuración de la infraestructura asociada: triggers, permisos, API Gateways.
+- La plataforma cloud gestiona la ejecución y el escalado.
+
+> **Complemento**
+>
+> - Ejemplos: AWS Lambda, Google Cloud Functions / Cloud Run functions, Azure Functions, Cloudflare Workers.
+> - El artefacto cambia: en vez de una imagen que corre siempre, es un `.zip` (o imagen de contenedor) que se ejecuta solo cuando llega un evento (petición HTTP por API Gateway, archivo en S3, mensaje en SQS, cron).
+> - Herramientas de CD: AWS SAM (`sam deploy`), Serverless Framework, AWS CDK o Terraform. Despliegan código + infraestructura juntos (función, rol IAM, trigger), así que es IaC por naturaleza.
+> - Estrategias de despliegue: Lambda tiene versiones y alias; con CodeDeploy se hace canary (`Canary10Percent5Minutes`) o lineal moviendo el peso del alias, y rollback automático si una alarma de CloudWatch se dispara.
+> - Permisos: cada función con su rol IAM de mínimo privilegio.
+> - Trade-off: pagas por ejecución y escala a cero, pero hay arranque en frío (*cold start*), límites de tiempo (15 min en Lambda), dependencia del proveedor (*vendor lock-in*) y es más difícil probar en local.
+
+Artefacto típico:
+
+- Un archivo `.zip` con el código de la función y sus dependencias.
+- Un archivo de definición de la infraestructura. Ejemplos: `template.yaml` (AWS SAM), `serverless.yml` (Serverless Framework), `main.tf` (Terraform).
+
+> **Complemento**
+>
+> Ejemplo mínimo de `template.yaml` (SAM):
+>
+> ```yaml
+> Resources:
+>   ReservarFn:
+>     Type: AWS::Serverless::Function
+>     Properties:
+>       CodeUri: src/            # se empaqueta como .zip
+>       Handler: app.handler
+>       Runtime: python3.13
+>       AutoPublishAlias: live
+>       DeploymentPreference:
+>         Type: Canary10Percent5Minutes   # canary con rollback automático
+>       Events:
+>         Api:
+>           Type: Api                     # crea el API Gateway
+>           Properties: { Path: /reservas, Method: post }
+> ```
+>
+> - En CI: `sam build` arma el `.zip`; `sam package` lo sube a S3 (equivale al `docker push` al registro). En CD: `sam deploy` aplica el template con ese mismo paquete en staging y luego en producción.
+> - Los dos archivos se versionan juntos en el repo: código e infraestructura cambian en el mismo PR.
+
+Pipeline serverless:
+
+1. El pipeline de CI valida el código y empaqueta el `.zip`.
+2. El pipeline de CD crea la infraestructura (IaC).
+3. El pipeline de CD despliega el código en esa infraestructura.
+
+> **Complemento**
+>
+> - Con Terraform los pasos 2 y 3 suelen ser uno: `terraform apply` crea la Lambda, el rol y el API Gateway, y apunta la función al `.zip` del paso 1. Con SAM también: `sam deploy` hace las dos cosas en un solo stack de CloudFormation.
+> - Se separan cuando la infraestructura cambia poco: un `terraform apply` ocasional crea todo, y en cada release el CD solo actualiza el código (`aws lambda update-function-code --s3-key reservar-1.4.0.zip` y publica una nueva versión del alias).
+> - Comparado con contenedores: `.zip` en S3 = imagen en el registro; actualizar la función = actualizar el Deployment en Kubernetes. La regla "build once" es la misma.
+
+### Retos de CD con microservicios
+
+Microservicios: es una arquitectura de software que compone una aplicación en piezas pequeñas e independientes, cada una realizando una función específica y comunicándose con las demás.
+
+> **Complemento**
+>
+> - Ejemplo con la app de vuelos: servicio de búsqueda, de reservas, de pagos y de notificaciones; cada uno con su repo o carpeta, su pipeline, su base de datos y su despliegue. Se hablan por HTTP/REST, gRPC o mensajes (SQS, Kafka).
+> - Ventaja para CD: cada equipo despliega su servicio sin esperar a los demás, y un fallo queda acotado a ese servicio.
+> - Retos típicos (probablemente lo que sigue en clase): muchos pipelines que mantener; compatibilidad entre versiones de servicios (se cubre con pruebas de contrato, Pact); pruebas E2E más difíciles; orden de despliegue y dependencias; datos repartidos en varias BD; observabilidad con tracing distribuido para seguir una petición entre servicios.
+> - Trade-off: frente a un monolito, ganas independencia y escalado por servicio, pero pagas en complejidad operativa. Para equipos pequeños un monolito modular suele bastar.
+
+Retos que introduce:
+
+- Gestión de dependencias.
+- Compatibilidad de APIs.
+- Pruebas E2E complejas.
+- Visibilidad y debugging.
+- Consistencia de datos.
+- Complejidad del pipeline.
+
+> **Complemento** (cómo se ataca cada reto)
+>
+> | Reto | Qué pasa | Cómo se mitiga |
+> |---|---|---|
+> | Gestión de dependencias | Reservas necesita la versión X de Pagos; desplegar en mal orden rompe el flujo | Servicios desacoplados por mensajes (SQS, Kafka), versionado semántico, cambios retrocompatibles |
+> | Compatibilidad de APIs | Un cambio en el contrato rompe a quien lo consume | Pruebas de contrato en CI (Pact), versionar la API (`/v1`, `/v2`), expand/contract |
+> | Pruebas E2E complejas | Levantar todos los servicios para probar es lento y frágil | Pocas E2E de flujos críticos; el grueso con contrato e integración; ambientes efímeros por PR |
+> | Visibilidad y debugging | Un error cruza varios servicios y no se sabe dónde nació | Tracing distribuido (OpenTelemetry, Jaeger, X-Ray), logs con correlation ID |
+> | Consistencia de datos | Cada servicio tiene su BD; no hay transacción global | Patrón Saga, consistencia eventual, outbox |
+> | Complejidad del pipeline | N servicios = N pipelines que mantener | Workflows reutilizables (GitHub Actions `workflow_call`), plantillas, monorepo con detección de cambios |
+
 ## 2026-11-13 - Comentario del profesor (Taller 1, buzón)
 
 > En la pregunta 2 mostraste con tu propia ejecución que el mismo script dice Darwin en tu Mac y Linux en el runner, y explicaste que con windows-latest el shell sería PowerShell y $(date) tendría que cambiar. También dejaste enlazadas la ejecución por push y la manual, ambas en verde y con el autor actualizado. Sigue así en el Taller 2. Te baje 0.5 por la entrega tardía.
@@ -711,8 +990,8 @@ Cómo funciona:
 | Canary release | Introducir una versión nueva de forma gradual, exponiéndola primero a un grupo pequeño de usuarios | 2026-11-14 |
 | DAST | Pruebas de seguridad dinámicas contra la aplicación en ejecución | 2026-11-14 |
 | Vault | Almacén seguro de secretos que el pipeline consulta en ejecución | 2026-11-14 |
-| Feature flag | Interruptor para activar o desactivar una funcionalidad sin redesplegar | 2026-11-14 |
-| Rollback | Revertir a una versión anterior | 2026-11-14 |
+| Feature flag | Activar o desactivar funcionalidades con condicionales en el código; el estado se gestiona en un sistema de configuración externo | 2026-11-14 |
+| Rollback automatizado | Volver solo a la última versión estable cuando un despliegue falla; red de seguridad final | 2026-11-14 |
 | Prueba E2E / de aceptación | Simula flujos completos de usuario sobre el sistema integrado | 2026-11-14 |
 | Prueba de contrato | Verifica que las APIs entre servicios cumplen el contrato acordado y siguen compatibles | 2026-11-14 |
 | Prueba de carga | Verifica el comportamiento bajo carga esperada y pico | 2026-11-14 |
@@ -722,3 +1001,8 @@ Cómo funciona:
 | Big bang (despliegue) | Reemplazar la versión antigua por la nueva de golpe, para todos los usuarios | 2026-11-14 |
 | Blast radius | Alcance del daño si un despliegue sale mal | 2026-11-14 |
 | Rolling update | Reemplazar las instancias de a pocas por la versión nueva; default de Kubernetes | 2026-11-14 |
+| Kill switch | Flag que apaga de inmediato una funcionalidad en producción si falla | 2026-11-14 |
+| Expand/contract | Migrar el esquema de BD en pasos compatibles hacia atrás para que el rollback del código no rompa la app | 2026-11-14 |
+| Observabilidad | Ir más allá del monitoreo: saber no solo qué falla sino por qué, con logs, métricas y tracing | 2026-11-14 |
+| Tracing distribuido | Seguir el recorrido de una petición a través de varios servicios | 2026-11-14 |
+| Continuous Delivery | Los cambios que pasan CI se despliegan solos a un entorno similar a producción; el paso a producción requiere aprobación manual | 2026-11-14 |
