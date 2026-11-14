@@ -14,9 +14,9 @@
 - [x] SonarCloud público: Quality Gate Passed, 0 issues, 0 hotspots, cobertura 100%
 - [x] Docker Hub público: `sjunka/cicd-pipeline-python` con `latest` y SHA de `main`
 - [x] `main` protegida con la regla `proteger-main` (PR, 1 aprobación, check `build-and-test`, sin bypass)
-- [~] PR #1 (sección 9): 3 pruebas nuevas, ejecución fallida por error intencional, ejecución final en verde. FALTA aprobación y merge de otro integrante.
-- [~] README (PR #2): integrantes, evidencias y 6 respuestas. FALTA aprobación y merge, nombres de compañeros y su parte de la pregunta 4.
-- [x] `AUTOR` e Integrantes con los 2 nombres completos (commit `3465080` en `docs/readme`). Equipo de 2: confirmar con el profesor (la guía pide 3)
+- [x] PR #1 (sección 9): 3 pruebas nuevas, ejecución fallida y final en verde. Aprobado y mergeado por valri2104 el 2026-11-14 (`1f7e5e9`).
+- [~] README (PR #2): integrantes, evidencias y 6 respuestas. Aprobado y mergeado por valri2104 el 2026-11-14 (`9ed6137`). FALTA el problema o aprendizaje de Valeria en la pregunta 4.
+- [x] `AUTOR` e Integrantes con los 2 nombres completos (en `main`). Equipo de 2: confirmar con el profesor (la guía pide 3)
 
 ## Pendiente con el equipo
 
