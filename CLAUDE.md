@@ -40,6 +40,6 @@ No inventar datos, citas ni resultados. Si falta información, preguntar.
 
 ## Equipo y repositorio
 
-Repo: https://github.com/sjunka/IntegracionYEntregaContinua (privado) (rama `main`). Commitear y empujar solo cuando Sergio lo pida.
+Repo: https://github.com/sjunka/IntegracionYEntregaContinua (público) (rama `main`). Commitear y empujar solo cuando Sergio lo pida.
 Compartir con el equipo: repo o carpeta compartida con `board.md`, `notes.md` y `assignments/`.
 Nunca subir credenciales, tokens, `.env` ni datos personales de compañeros fuera de nombres.
