@@ -52,6 +52,9 @@ Estados: Pendiente, En curso, Hecho, Entregado, Calificado.
 
 ## Bitácora
 
+### 2026-11-14 - Clase (CD y Continuous Deployment)
+- Preguntar al profe: pedir las diapositivas de la clase; faltaron las desventajas de rolling update.
+
 ### AAAA-MM-DD - Clase 1
 - (pegar notas aquí)
 

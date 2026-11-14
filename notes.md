@@ -62,6 +62,134 @@ Rol de IaC en CD:
 > - Ejemplo en pipeline: `terraform plan` en el PR (muestra qué cambiará) y `terraform apply` al hacer merge a `main`, con aprobación en `production`.
 > - Trade-off: curva de aprendizaje y manejo del *state* (archivo de estado de Terraform, debe guardarse remoto y con bloqueo); a cambio se elimina el *configuration drift* (ambientes que divergen por cambios manuales).
 
+### Tareas clave a automatizar
+
+- Orquestación de despliegues: gestionar el flujo del artefacto a los entornos (dev, staging y producción).
+- Aprovisionamiento de entornos (IaC): crear y actualizar infraestructura usando IaC.
+- Gestión de configuración segura: aplicar configuraciones específicas por entorno (variables, API keys, feature flags) de forma segura, integrado con vaults.
+- Ejecución de estrategias de despliegue: implementar blue-green y canary de forma automática.
+- Ejecución de pruebas avanzadas: integrar y ejecutar pruebas E2E, de performance y DAST.
+- Implementación de rollbacks: dispara y ejecuta la reversión a una versión anterior.
+
+> **Complemento**
+>
+> - Orquestación: en GitHub Actions, un workflow con jobs `deploy-dev` -> `deploy-staging` -> `deploy-prod` unidos por `needs:`; herramientas dedicadas: Argo CD, Spinnaker, Octopus Deploy.
+> - Vaults: HashiCorp Vault, AWS Secrets Manager, Azure Key Vault. El pipeline lee el secreto en tiempo de ejecución; nunca va en el repo. Feature flags: LaunchDarkly, Unleash (activar una funcionalidad sin redesplegar).
+> - Blue-green: dos entornos idénticos; se despliega en el inactivo y se cambia el tráfico de golpe. Rollback = volver a apuntar al anterior. Costo: infraestructura doble.
+> - Canary: la versión nueva recibe un % pequeño del tráfico (ej. 5%), se miden errores y latencia, y se amplía gradualmente. Herramientas: Argo Rollouts, Flagger.
+> - Pruebas: E2E (Playwright, Cypress), performance (k6, JMeter), DAST = pruebas de seguridad contra la app corriendo (OWASP ZAP). Suelen correr en staging porque necesitan la app desplegada.
+> - Rollback automático: se dispara cuando una métrica (tasa de errores, health check) cruza un umbral tras el despliegue. Requiere artefactos versionados (relación con infraestructura inmutable) y cuidado con migraciones de BD que no son reversibles.
+
+### Pruebas clave en las etapas de CD
+
+Esenciales en staging:
+
+- **Pruebas E2E / de aceptación** (Cypress, Selenium, Playwright): simulan flujos de usuario completos (login, compra, pago). Verifican requisitos funcionales en el sistema integrado.
+- **Pruebas de contrato**: asegurar que las APIs cumplen los contratos esperados entre servicios (microservicios). Aseguran que las APIs entre servicios mantengan compatibilidad.
+- **Pruebas de rendimiento / de carga** (JMeter): verificar el comportamiento bajo carga esperada y pico. ¿Es rápida? ¿Escala? ¿Consume recursos eficientemente? Fundamental.
+- **Pruebas de seguridad dinámica (DAST)** (OWASP ZAP): buscar vulnerabilidades en la aplicación en ejecución. Simulan ataques desde el punto de acceso del usuario.
+
+Validación post-producción:
+
+- **Smoke tests** (scripts simples, Postman/Newman): chequeos básicos en producción para verificar disponibilidad y funcionalidad crítica inmediatamente tras desplegar. Ejemplo: ¿la app responde? Un fallo en estas pruebas indica un problema grave.
+
+> **Complemento**
+>
+> - Contrato: la herramienta más usada es Pact (*consumer-driven contracts*): el consumidor define qué espera de la API y el proveedor lo verifica en su pipeline, sin levantar todos los microservicios. También OpenAPI + validación de esquema.
+> - Carga: además de JMeter, k6 y Gatling (scripts versionables en el repo). Diferencia: carga = volumen esperado; estrés = por encima del pico hasta romper.
+> - DAST vs SAST: SAST analiza el código fuente sin ejecutarlo (en CI, ej. Semgrep, CodeQL); DAST ataca la app corriendo (en CD, sobre staging). Se complementan.
+> - Smoke test mínimo en un pipeline: `curl -fsS https://app/health || exit 1` tras el deploy; si falla, dispara el rollback (relación con "Tareas clave a automatizar").
+> - Orden típico en el pipeline: unitarias (CI) -> deploy staging -> contrato + E2E + carga + DAST -> deploy prod -> smoke test.
+
+### Seguridad en CD
+
+Necesidad: la seguridad no es algo que se añade al final; debe estar integrada en todo el ciclo, en sus fases y componentes.
+
+Puntos de control post-CI:
+
+- **Escaneo de artefactos / imágenes**: busca vulnerabilidades conocidas en las dependencias y en el sistema operativo base antes de desplegarlas. Herramientas: Trivy, Clair, Snyk Container, JFrog Xray.
+- **Análisis de seguridad en la IaC**: escanear todo el código en Terraform, etc. Busca malas configuraciones de seguridad (puertos abiertos, buckets públicos, permisos excesivos) antes de aplicar cambios. Herramientas: Checkov, Terrascan.
+- **Pruebas de seguridad DAST**: ejecutan escaneos automatizados contra la aplicación ya desplegada en un entorno staging para encontrar vulnerabilidades en tiempo de ejecución (XSS, SQLi). Herramientas: OWASP ZAP, Burp.
+- **Gestión segura de secretos**: asegurar que el pipeline obtiene los secretos necesarios para producción (API keys, BDs) de forma segura desde un gestor centralizado (Vault, AWS Secrets Manager, Azure Key Vault) justo en el momento del despliegue, sin exponerlos antes.
+
+> **Complemento**
+>
+> - Nombre del enfoque: DevSecOps / *shift left* (mover la seguridad hacia etapas tempranas).
+> - Escaneo de imagen en el pipeline: `trivy image --exit-code 1 --severity HIGH,CRITICAL miapp:1.2.0` rompe el build si hay vulnerabilidades altas o críticas.
+> - IaC: `checkov -d infra/` sobre la carpeta de Terraform; se corre en el PR, junto al `terraform plan`.
+> - Secretos sin exponerlos: en GitHub Actions, OIDC permite que el job pida credenciales temporales a AWS/Azure sin guardar llaves fijas en el repo; los valores se enmascaran en los logs.
+> - Trade-off: cada escáner agrega minutos y falsos positivos; se define un umbral (ej. solo bloquear HIGH/CRITICAL) y una lista de excepciones revisada.
+
+### Estrategias de despliegue avanzadas
+
+El riesgo del "big bang": reemplazar la versión antigua por la nueva de golpe es simple pero arriesgado. Si la nueva versión tiene un bug, afecta a todos los usuarios al instante.
+
+**Blast radius**: es el alcance del daño si un despliegue sale mal.
+
+Objetivos de las estrategias:
+
+- Introducir cambios en producción de forma controlada.
+- Limitar el número de usuarios expuestos.
+- Permitir la detección temprana de problemas.
+- Facilitar el rollback rápido y seguro.
+
+> **Complemento**
+>
+> - Estrategias que reducen el blast radius: rolling update (reemplaza instancias de a pocas; es el default de Kubernetes `Deployment`), blue-green (cambio de tráfico total pero con vuelta inmediata), canary (empieza con un % pequeño de usuarios), feature flags (el código se despliega apagado y se enciende por segmentos).
+> - Ejemplo: canary al 5% durante 10 minutos; si la tasa de errores supera el umbral, rollback automático y solo el 5% vio el fallo.
+> - Trade-off: big bang es lo más barato y simple (útil para apps pequeñas o con ventana de mantenimiento); las estrategias avanzadas exigen balanceador con control de tráfico, monitoreo y que dos versiones convivan (APIs y esquema de BD compatibles).
+
+#### Rolling update
+
+Ventajas:
+
+- Generalmente simple de configurar (por defecto con Kubernetes).
+- No requiere infraestructura adicional.
+- Despliegue gradual.
+
+Desventajas: (faltaron; pedir al profe las diapositivas.)
+
+> **Complemento**
+>
+> - Cómo funciona: reemplaza las instancias (pods) de a pocas; en Kubernetes se controla con `maxSurge` (cuántas extra se crean) y `maxUnavailable` (cuántas pueden faltar). Solo pasa tráfico a la nueva instancia cuando su `readinessProbe` responde.
+> - Desventajas: durante el despliegue conviven versión vieja y nueva (deben ser compatibles); el rollback no es instantáneo (es otro rolling update hacia atrás, `kubectl rollout undo`); no se elige qué usuarios ven la nueva versión.
+
+#### Blue-green
+
+Mantener dos entornos idénticos completos en paralelo.
+
+Cómo funciona:
+
+1. Desplegar la nueva versión completa en Green mientras Blue sirve.
+1. Realizar pruebas en Green.
+1. Cuando Green es validado, cambiar el router / balanceador y dirigir todo el tráfico a Green.
+1. Mantener el antiguo Blue, ahora inactivo, como backup para un rollback.
+
+> **Complemento**
+>
+> - Flujo: Blue sirve producción; se despliega la versión nueva en Green; se prueba Green (smoke tests); el balanceador o DNS cambia todo el tráfico a Green. Blue queda en espera como rollback inmediato (volver a apuntar).
+> - Herramientas: AWS CodeDeploy (blue/green en ECS), target groups de un ALB, o dos `Service` en Kubernetes cambiando el selector.
+> - Trade-off: rollback casi instantáneo y cero downtime, a cambio de pagar infraestructura doble y resolver la BD compartida (migraciones compatibles con ambas versiones).
+
+#### Canary release
+
+Introducir una nueva versión de forma gradual, exponiéndola al comienzo a un grupo pequeño de usuarios.
+
+Cómo funciona:
+
+1. Desplegar v2 junto a v1 (ambas activas).
+1. Configurar el router / balanceador para enviar un pequeño porcentaje del tráfico a v2.
+1. Monitorear intensivamente: observar de cerca métricas, errores y logs.
+1. Si las métricas de v2 son buenas y no hay errores, incrementar gradualmente el tráfico hacia v2.
+1. Si se detectan problemas en cualquier momento, revertir inmediatamente dirigiendo el 100% del tráfico de vuelta a v1.
+
+> **Complemento**
+>
+> - Nombre: viene del canario en las minas de carbón, que avisaba del gas antes que a los mineros.
+> - Flujo típico: 5% -> 25% -> 50% -> 100%, avanzando solo si las métricas (errores, latencia) del canary se parecen a las de la versión estable; si no, rollback y solo el grupo pequeño se vio afectado.
+> - Herramientas: Argo Rollouts, Flagger, AWS App Mesh / pesos en target groups de un ALB, Istio.
+> - Trade-off frente a blue-green: no duplica toda la infraestructura y limita más el blast radius, pero exige buen monitoreo y es más lento llegar al 100%.
+
 ## 2026-11-13 - Comentario del profesor (Taller 1, buzón)
 
 > En la pregunta 2 mostraste con tu propia ejecución que el mismo script dice Darwin en tu Mac y Linux en el runner, y explicaste que con windows-latest el shell sería PowerShell y $(date) tendría que cambiar. También dejaste enlazadas la ejecución por push y la manual, ambas en verde y con el autor actualizado. Sigue así en el Taller 2. Te baje 0.5 por la entrega tardía.
@@ -579,3 +707,18 @@ Rol de IaC en CD:
 | Staging | Ambiente que replica producción para pruebas finales | 2026-11-14 |
 | IaC (Infraestructura como Código) | Definir la infraestructura en archivos versionados; cimientos automatizados para CD | 2026-11-14 |
 | Infraestructura inmutable | No modificar servidores en ejecución; reemplazarlos por una versión nueva | 2026-11-14 |
+| Blue-green | Dos entornos idénticos; se despliega en el inactivo y se cambia el tráfico | 2026-11-14 |
+| Canary release | Introducir una versión nueva de forma gradual, exponiéndola primero a un grupo pequeño de usuarios | 2026-11-14 |
+| DAST | Pruebas de seguridad dinámicas contra la aplicación en ejecución | 2026-11-14 |
+| Vault | Almacén seguro de secretos que el pipeline consulta en ejecución | 2026-11-14 |
+| Feature flag | Interruptor para activar o desactivar una funcionalidad sin redesplegar | 2026-11-14 |
+| Rollback | Revertir a una versión anterior | 2026-11-14 |
+| Prueba E2E / de aceptación | Simula flujos completos de usuario sobre el sistema integrado | 2026-11-14 |
+| Prueba de contrato | Verifica que las APIs entre servicios cumplen el contrato acordado y siguen compatibles | 2026-11-14 |
+| Prueba de carga | Verifica el comportamiento bajo carga esperada y pico | 2026-11-14 |
+| Smoke test | Chequeo básico en producción justo después de desplegar | 2026-11-14 |
+| Escaneo de imágenes | Buscar vulnerabilidades conocidas en dependencias y SO base de un artefacto antes de desplegar | 2026-11-14 |
+| DevSecOps / shift left | Integrar la seguridad en todo el ciclo, desde etapas tempranas | 2026-11-14 |
+| Big bang (despliegue) | Reemplazar la versión antigua por la nueva de golpe, para todos los usuarios | 2026-11-14 |
+| Blast radius | Alcance del daño si un despliegue sale mal | 2026-11-14 |
+| Rolling update | Reemplazar las instancias de a pocas por la versión nueva; default de Kubernetes | 2026-11-14 |
