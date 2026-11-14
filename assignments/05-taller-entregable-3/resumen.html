@@ -1,0 +1,87 @@
+<title>Taller 3 CD en AWS ECS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: una columna de lectura, flujo de 5 jobs como fila que se apila en móvil */
+:root{--bg:#f6f7f8;--fg:#1c2127;--muted:#5b6670;--line:#d9dee3;--accent:#0b6e8a;--ok:#1a7f4b;--todo:#a15c00;--card:#fff;
+--sans:Inter,system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12171c;--fg:#e6eaee;--muted:#9aa6b1;--line:#2b343c;--accent:#5cc0dc;--ok:#4cc58a;--todo:#e0a040;--card:#1a2127;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12171c;--fg:#e6eaee;--muted:#9aa6b1;--line:#2b343c;--accent:#5cc0dc;--ok:#4cc58a;--todo:#e0a040;--card:#1a2127;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.55;
+padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:28px;min-width:0}
+h1{font-size:1.8rem;line-height:1.2;margin:0;text-wrap:balance}
+h2{font-size:1.15rem;margin:0 0 10px}
+p{margin:0 0 8px}
+.sub{color:var(--muted)}
+code{font-family:var(--mono);font-size:.88em;background:var(--card);border:1px solid var(--line);padding:1px 5px;border-radius:4px}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.job{flex:1 1 130px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px;font-size:.9rem}
+.job b{display:block;font-family:var(--mono);font-size:.8rem;color:var(--accent);margin-bottom:4px}
+ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.tag{font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.ok{color:var(--ok)}.todo{color:var(--todo)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
+.wide{overflow-x:auto}
+pre{margin:0;font-family:var(--mono);font-size:.85rem}
+a{color:var(--accent)}
+</style>
+<main>
+<header>
+<h1>Taller 3: despliegue continuo en AWS ECS con Terraform</h1>
+<p class="sub">SI6008, EAFIT. Sergio Junca. Qué se hizo hasta ahora y qué falta.</p>
+</header>
+
+<section>
+<h2>Qué pide el taller</h2>
+<p>Tomar la calculadora Flask del Taller 2 y desplegarla sola en AWS: primero a Staging y, tras una aprobación manual, a Producción. La infraestructura se escribe con Terraform.</p>
+<div class="flow">
+<div class="job"><b>build-and-test</b>CI del taller 2 + valida Terraform + publica la imagen</div>
+<div class="job"><b>deploy-staging</b>terraform apply con la imagen del SHA</div>
+<div class="job"><b>test-staging</b>pruebas de aceptación (Selenium) contra la URL del ALB</div>
+<div class="job"><b>deploy-production</b>pide aprobación de un compañero</div>
+<div class="job"><b>smoke-test-production</b>página carga y <code>/health</code> da el SHA</div>
+</div>
+</section>
+
+<section class="box">
+<h2><span class="tag ok">Hecho</span> sin tocar AWS</h2>
+<ul>
+<li>Repo nuevo público <a href="https://github.com/sjunka/cicd-pipeline-python-cd">cicd-pipeline-python-cd</a>, copiado del Taller 2. El Taller 2 queda intacto.</li>
+<li>Ruta <code>/health</code> que responde <code>{"status":"ok","version":...}</code>, con su prueba. El balanceador la usa para saber si la app vive.</li>
+<li>Carpeta <code>infra/</code>: cluster ECS, Fargate, balanceador (ALB), grupos de seguridad y logs. Estado de Terraform en un bucket S3 con un workspace por ambiente.</li>
+<li>Pruebas de humo (<code>tests/test_smoke_app.py</code>) y el workflow <code>ci-cd.yml</code> con los 5 jobs.</li>
+<li>Rama <code>feature/nuevas-operaciones</code>: potencia y módulo con pruebas unitarias, de componente y de aceptación. Para abrirla como PR cuando <code>main</code> esté protegida.</li>
+</ul>
+</section>
+
+<section class="box">
+<h2>Verificado en local</h2>
+<div class="wide"><pre>black app --check        OK
+pytest (sin aceptación)  13 pasan, cobertura 100%  (19 en la rama nueva)
+terraform fmt/validate   OK</pre></div>
+<p class="sub" style="margin-top:8px">Nada se ha desplegado ni subido todavía: el repo está vacío en GitHub.</p>
+</section>
+
+<section class="box">
+<h2><span class="tag todo">Falta</span> y necesita a Sergio</h2>
+<ul>
+<li>Credenciales del AWS Academy Learner Lab. La CLI de este equipo apunta a otro usuario IAM, no al laboratorio, así que no se despliega hasta cambiarlas.</li>
+<li>Proyecto en SonarCloud, tokens de SonarCloud y Docker Hub, y los secretos en GitHub.</li>
+<li>Primer push, bucket S3, despliegue manual de Staging y luego el pipeline completo.</li>
+<li>Con el equipo: colaboradores, regla <code>proteger-main</code>, revisores de <code>production</code>, PR de las operaciones nuevas, README con las 7 respuestas y las 2 capturas.</li>
+<li>Al entregar: subir las 3 URLs a Interactiva y destruir la infraestructura (cuesta cerca de USD 2,4 por día con los dos ambientes).</li>
+</ul>
+</section>
+
+<section>
+<h2>Decisiones para sustentar</h2>
+<ul>
+<li>Se despliega la imagen con el SHA del commit y no <code>latest</code>: así se sabe qué corre en cada ambiente y Terraform detecta el cambio.</li>
+<li>Staging recibe la misma imagen que Producción; solo cambia el workspace. Es construir una vez y promover.</li>
+<li>Con la aprobación manual el flujo es Entrega Continua; sin ella sería Despliegue Continuo.</li>
+<li>Si la versión nueva no pasa el health check, ECS revierte solo (circuit breaker) y el pipeline falla porque <code>/health</code> sigue mostrando el SHA anterior.</li>
+<li>No se agregó nada fuera de la guía.</li>
+</ul>
+</section>
+</main>

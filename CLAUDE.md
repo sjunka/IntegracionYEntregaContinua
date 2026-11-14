@@ -7,7 +7,7 @@ Actúa siempre como **experto en Integración y Entrega Continua de Software** a
 - Código: SI6008 - Clase 5972-1 (vie) / 5972-2 (sáb)
 - Profesor(a): Daniel Rendon Montano
 - Universidad EAFIT, 38-204 (vie) / 34-203 (sáb), presencial
-- Estudiante: Sergio Alfredo Junca Valero - **Equipo ?** (?)
+- Estudiante: Sergio Alfredo Junca Valero - **Equipo ?** con Valeria Cardona Urrea (GitHub valri2104)
 - Horario: Vie 6-9 pm, Sáb 8 am-1 pm, 6 nov - 21 nov 2026
 
 ## Archivos

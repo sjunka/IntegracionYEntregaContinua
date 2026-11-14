@@ -45,7 +45,7 @@ Ver `plan.md`.
 ## Checklist final
 
 - [ ] Cumple los 10 puntos de la presentación y los mínimos del pipeline
-- [ ] Nombres de los integrantes en el repo y en las diapositivas
+- [ ] Nombres de los integrantes en el repo y en las diapositivas (Sergio Alfredo Junca Valero, Valeria Cardona Urrea, tercero pendiente)
 - [ ] Repo público con el run exitoso enlazado en el README
 - [ ] Video de respaldo de la demo
 - [ ] `terraform destroy` y bucket del estado borrado después de exponer

@@ -8,6 +8,15 @@ Tareas, fechas y entregas van en `board.md`. Clases recientes arriba.
 
 ---
 
+## Equipo (para entregas)
+
+- Sergio Alfredo Junca Valero
+- Valeria Cardona Urrea (GitHub: valri2104)
+
+Usar estos nombres en `AUTOR`, README y diapositivas del Taller 3 y del proyecto final.
+
+---
+
 ## 2026-11-14 - Clase
 
 Tema: Continuous Delivery y Continuous Deployment.
@@ -468,6 +477,56 @@ Retos que introduce:
 > | Visibilidad y debugging | Un error cruza varios servicios y no se sabe dónde nació | Tracing distribuido (OpenTelemetry, Jaeger, X-Ray), logs con correlation ID |
 > | Consistencia de datos | Cada servicio tiene su BD; no hay transacción global | Patrón Saga, consistencia eventual, outbox |
 > | Complejidad del pipeline | N servicios = N pipelines que mantener | Workflows reutilizables (GitHub Actions `workflow_call`), plantillas, monorepo con detección de cambios |
+
+### GitOps
+
+Es un marco de trabajo operacional que utiliza Git como la única fuente de verdad para la infraestructura y las aplicaciones.
+
+- Automatiza la entrega continua y el despliegue de software, haciendo los cambios predecibles y auditables.
+- Se basa en los principios de IaC, al utilizar código para definir el estado deseado.
+- Sin embargo, GitOps va más allá: define cómo se aplican y mantienen esos cambios en producción de forma continua y automatizada (por ejemplo, las estrategias de despliegue).
+
+> **Complemento**
+>
+> - Cómo funciona: un agente dentro del clúster (Argo CD o Flux) vigila un repo de configuración (manifiestos, Helm). Si el repo dice `api:1.4.0` y el clúster corre `1.3.9`, el agente lo sincroniza. Modelo **pull**: el pipeline no toca el clúster.
+> - Flujo con CI: CI construye y sube la imagen, y luego abre un PR (o hace commit) que cambia el tag en el repo de configuración. Al hacer merge, Argo CD despliega. Rollback = `git revert` de ese commit.
+> - Principios OpenGitOps (CNCF): declarativo, versionado e inmutable, extraído automáticamente (*pulled*), reconciliado continuamente.
+> - Diferencia con IaC sola: con Terraform alguien corre `apply` y, si después alguien cambia algo a mano, nadie lo nota (*drift*). En GitOps el agente detecta el drift y lo corrige solo.
+> - Estrategias: Argo Rollouts y Flagger hacen canary y blue-green declarados en Git, avanzando según métricas.
+> - Ventajas: auditoría (todo cambio es un commit con autor y PR), menos credenciales del clúster en el CI, recuperación rápida. Trade-off: es casi exclusivo de Kubernetes, suma otro componente que operar, y manejar secretos en Git exige herramientas extra (Sealed Secrets, External Secrets).
+
+### Herramientas de orquestación de despliegue (CD)
+
+Orquestan el proceso de release y deploy completo, después de CI.
+
+Capacidades típicas:
+
+- Modelar pipelines de despliegue.
+- Gestionar múltiples entornos.
+- Integrarse con herramientas de CI, repositorios de artefactos y cloud providers.
+- Soportar diferentes estrategias de despliegue.
+- Gestionar aprobaciones manuales (entrega continua).
+- Proporcionar visibilidad y dashboards del estado de los despliegues.
+
+Ejemplos:
+
+- Plataformas dedicadas: Argo CD, Harness, Octopus Deploy.
+- Funcionalidades de suites DevOps: GitLab CI/CD, GitHub Actions (workflows), Azure Pipelines, AWS CodePipeline y CodeDeploy.
+
+> **Complemento**
+>
+> | Herramienta | Modelo | Cuándo elegirla |
+> |---|---|---|
+> | Argo CD | GitOps (pull), solo Kubernetes, open source (CNCF) | Todo corre en K8s y se quiere Git como fuente de verdad |
+> | Harness | SaaS comercial, verificación de despliegues con ML sobre métricas | Empresas con muchos servicios que quieren canary con rollback automático listo |
+> | Octopus Deploy | Comercial, fuerte en releases y ambientes (incluye on-premise y .NET) | Muchos ambientes/clientes y procesos de aprobación formales |
+> | GitHub Actions | Workflows + `environment` con *required reviewers* | El código ya está en GitHub (lo que usamos en los talleres) |
+> | GitLab CI/CD | Integrado con el repo, ambientes y review apps | Equipos en GitLab que quieren una sola plataforma |
+> | Azure Pipelines | Stages con aprobaciones y gates | Ecosistema Microsoft/Azure |
+> | AWS CodePipeline + CodeDeploy | CodePipeline encadena etapas; CodeDeploy hace blue-green/canary en EC2, ECS y Lambda | Todo en AWS y se quiere servicio administrado |
+>
+> - Separación típica: GitHub Actions para CI y Argo CD para CD en Kubernetes. Así el CI no necesita credenciales del clúster.
+> - Trade-off: la suite DevOps es más simple (una herramienta, un login); la plataforma dedicada da mejor visibilidad, estrategias y rollback, pero es otra herramienta que pagar y operar.
 
 ## 2026-11-13 - Comentario del profesor (Taller 1, buzón)
 
