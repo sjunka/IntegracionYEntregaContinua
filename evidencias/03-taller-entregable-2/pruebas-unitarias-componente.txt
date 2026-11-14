@@ -1,0 +1,22 @@
+tests/test_app.py::test_index_post_invalid_operation [32mPASSED[0m[32m              [ 58%][0m
+tests/test_app.py::test_index_post_invalid_numbers [32mPASSED[0m[32m                [ 66%][0m
+tests/test_calculadora.py::test_sumar [32mPASSED[0m[32m                             [ 75%][0m
+tests/test_calculadora.py::test_restar [32mPASSED[0m[32m                            [ 83%][0m
+tests/test_calculadora.py::test_multiplicar [32mPASSED[0m[32m                       [ 91%][0m
+tests/test_calculadora.py::test_dividir [32mPASSED[0m[32m                           [100%][0m
+
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.13.15-final-0 _______________
+
+Name                 Stmts   Miss Branch BrPart  Cover   Missing
+----------------------------------------------------------------
+app/__init__.py          0      0      0      0   100%
+app/app.py              25      0     10      0   100%
+app/calculadora.py      11      0      2      0   100%
+----------------------------------------------------------------
+TOTAL                   36      0     12      0   100%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+[32mRequired test coverage of 80% reached. Total coverage: 100.00%
+[0m- Generated html report: file:///Users/sjunka/Documents/IntegracionYEntregaContinua/assignments/03-taller-entregable-2/cicd-pipeline-python/report.html -
+[32m============================== [32m[1m12 passed[0m[32m in 0.15s[0m[32m ==============================[0m

@@ -1,0 +1,84 @@
+{
+  "python": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/python.svg",
+    "file": "python.svg",
+    "bytes": 1126
+  },
+  "flask": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/flask-light.svg",
+    "file": "flask.svg",
+    "bytes": 12348,
+    "dark_file": "flask_dark.svg",
+    "dark_url": "https://svgl.app/library/flask-dark.svg"
+  },
+  "github": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/github_light.svg",
+    "file": "github.svg",
+    "bytes": 997,
+    "dark_file": "github_dark.svg",
+    "dark_url": "https://svgl.app/library/github_dark.svg"
+  },
+  "githubactions": {
+    "source": "devicon",
+    "url": "https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg",
+    "file": "githubactions.svg",
+    "bytes": 2854
+  },
+  "docker": {
+    "source": "svgl",
+    "url": "https://svgl.app/library/docker.svg",
+    "file": "docker.svg",
+    "bytes": 1488
+  },
+  "sonarcloud": {
+    "source": "gilbarbara",
+    "url": "https://cdn.jsdelivr.net/gh/gilbarbara/logos/logos/sonarcloud-icon.svg",
+    "file": "sonarcloud.svg",
+    "bytes": 2665
+  },
+  "selenium": {
+    "source": "devicon",
+    "url": "https://raw.githubusercontent.com/devicons/devicon/master/icons/selenium/selenium-original.svg",
+    "file": "selenium.svg",
+    "bytes": 1096
+  },
+  "pytest": {
+    "source": "devicon",
+    "url": "https://raw.githubusercontent.com/devicons/devicon/master/icons/pytest/pytest-original.svg",
+    "file": "pytest.svg",
+    "bytes": 689
+  },
+  "dev": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/user.svg",
+    "file": "dev.svg",
+    "bytes": 371
+  },
+  "lock": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/lock.svg",
+    "file": "lock.svg",
+    "bytes": 381
+  },
+  "lint": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/spell-check.svg",
+    "file": "lint.svg",
+    "bytes": 384
+  },
+  "laptop": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/laptop.svg",
+    "file": "laptop.svg",
+    "bytes": 479
+  },
+  "fail": {
+    "source": "lucide",
+    "url": "https://cdn.jsdelivr.net/npm/lucide-static/icons/octagon-x.svg",
+    "file": "fail.svg",
+    "bytes": 584
+  }
+}

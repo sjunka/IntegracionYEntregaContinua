@@ -1,0 +1,10 @@
+## black --check
+All done! ✨ 🍰 ✨
+3 files would be left unchanged.
+## pylint app
+
+-------------------------------------------------------------------
+Your code has been rated at 10.00/10 (previous run: 8.11/10, +1.89)
+
+## flake8 app
+flake8 exit 0

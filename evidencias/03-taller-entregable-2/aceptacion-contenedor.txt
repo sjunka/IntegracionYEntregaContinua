@@ -1,0 +1,7 @@
+tests/test_acceptance_app.py::test_calculadora[2-3-sumar-Resultado: 5.0] PASSED [ 16%]
+tests/test_acceptance_app.py::test_calculadora[5-2-restar-Resultado: 3.0] PASSED [ 33%]
+tests/test_acceptance_app.py::test_calculadora[4-6-multiplicar-Resultado: 24.0] PASSED [ 50%]
+tests/test_acceptance_app.py::test_calculadora[10-2-dividir-Resultado: 5.0] PASSED [ 66%]
+tests/test_acceptance_app.py::test_calculadora[5-0-dividir-Resultado: Error: No se puede dividir por cero] PASSED [ 83%]
+tests/test_acceptance_app.py::test_calculadora[abc-def-sumar-Resultado: Error: Introduce n\xfameros v\xe1lidos] PASSED [100%]
+============================== 6 passed in 7.41s ===============================

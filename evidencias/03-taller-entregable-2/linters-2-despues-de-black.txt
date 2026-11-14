@@ -1,0 +1,27 @@
+## black app
+reformatted /Users/sjunka/Documents/IntegracionYEntregaContinua/assignments/03-taller-entregable-2/cicd-pipeline-python/app/calculadora.py
+reformatted /Users/sjunka/Documents/IntegracionYEntregaContinua/assignments/03-taller-entregable-2/cicd-pipeline-python/app/app.py
+
+All done! ✨ 🍰 ✨
+2 files reformatted, 1 file left unchanged.
+
+## black --check
+All done! ✨ 🍰 ✨
+3 files would be left unchanged.
+
+## pylint app (despues de black)
+************* Module app.calculadora
+app/calculadora.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/calculadora.py:9:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/calculadora.py:13:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/calculadora.py:17:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/calculadora.py:21:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module app.app
+app/app.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/app.py:9:0: C0116: Missing function or method docstring (missing-function-docstring)
+
+------------------------------------------------------------------
+Your code has been rated at 8.11/10 (previous run: 8.11/10, +0.00)
+
+## flake8 app (despues de black)
+flake8 exit 0

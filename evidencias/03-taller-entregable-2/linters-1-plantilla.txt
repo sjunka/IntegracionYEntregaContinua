@@ -1,0 +1,30 @@
+## black --check (antes)
+would reformat /Users/sjunka/Documents/IntegracionYEntregaContinua/assignments/03-taller-entregable-2/cicd-pipeline-python/app/calculadora.py
+would reformat /Users/sjunka/Documents/IntegracionYEntregaContinua/assignments/03-taller-entregable-2/cicd-pipeline-python/app/app.py
+
+Oh no! 💥 💔 💥
+2 files would be reformatted, 1 file would be left unchanged.
+
+## pylint app (antes)
+************* Module app.calculadora
+app/calculadora.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/calculadora.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/calculadora.py:11:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/calculadora.py:14:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/calculadora.py:17:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module app.app
+app/app.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/app.py:8:0: C0116: Missing function or method docstring (missing-function-docstring)
+
+-----------------------------------
+Your code has been rated at 8.11/10
+
+## flake8 app (antes)
+app/app.py:7:1: E302 expected 2 blank lines, found 1
+app/app.py:33:1: E305 expected 2 blank lines after class or function definition, found 1
+app/app.py:34:51: E261 at least two spaces before inline comment
+app/calculadora.py:8:1: E302 expected 2 blank lines, found 1
+app/calculadora.py:11:1: E302 expected 2 blank lines, found 1
+app/calculadora.py:14:1: E302 expected 2 blank lines, found 1
+app/calculadora.py:17:1: E302 expected 2 blank lines, found 1
+flake8 exit 1

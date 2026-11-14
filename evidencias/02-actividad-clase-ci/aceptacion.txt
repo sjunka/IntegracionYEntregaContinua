@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.2.0, pluggy-1.7.0 -- /Users/sjunka/Documents/IntegracionYEntregaContinua/assignments/02-actividad-clase-ci/lista-tareas-ci/venv/bin/python
+rootdir: /Users/sjunka/Documents/IntegracionYEntregaContinua/assignments/02-actividad-clase-ci/lista-tareas-ci
+configfile: pytest.ini
+plugins: cov-7.1.0
+collecting ... collected 1 item
+
+tests/test_acceptance_app.py::test_agregar_tarea_desde_el_navegador PASSED [100%]
+
+============================== 1 passed in 4.97s ===============================

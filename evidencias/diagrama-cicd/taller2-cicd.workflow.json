@@ -1,0 +1,229 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Taller 2: ciclo CI/CD de la calculadora",
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "frontend": {
+          "label": "Repositorio"
+        },
+        "backend": {
+          "label": "Paso del pipeline"
+        },
+        "security": {
+          "label": "Control o bloqueo"
+        },
+        "database": {
+          "label": "Registro de imágenes"
+        },
+        "cloud": {
+          "label": "Build Docker"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "dev",
+      "label": "Desarrollo (GitHub)"
+    },
+    {
+      "id": "ci",
+      "label": "Integración continua (GitHub Actions)"
+    },
+    {
+      "id": "entrega",
+      "label": "Calidad y entrega (SonarCloud, Docker Hub)"
+    },
+    {
+      "id": "fallo",
+      "label": "Fallo",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "cambio",
+      "label": "Cambio",
+      "fromCol": 0,
+      "toCol": 0
+    },
+    {
+      "id": "verificar",
+      "label": "Build y pruebas",
+      "fromCol": 1,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "publicar",
+      "label": "Gate y publicación",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "mainPath": [
+    "codigo",
+    "pr",
+    "lint",
+    "pruebas",
+    "build",
+    "aceptacion",
+    "sonar",
+    "push"
+  ],
+  "nodes": [
+    {
+      "id": "codigo",
+      "lane": "dev",
+      "col": 0,
+      "type": "frontend",
+      "label": "Código",
+      "sublabel": "Flask + Python 3.13",
+      "brand": "python"
+    },
+    {
+      "id": "pr",
+      "width": 100,
+      "lane": "dev",
+      "col": 1,
+      "type": "frontend",
+      "label": "PR",
+      "sublabel": "Pull Request",
+      "brand": "github",
+      "tag": "proteger-main"
+    },
+    {
+      "id": "lint",
+      "lane": "ci",
+      "col": 1,
+      "type": "backend",
+      "label": "Lint",
+      "sublabel": "Black, Pylint, Flake8",
+      "brand": "github-actions"
+    },
+    {
+      "id": "pruebas",
+      "lane": "ci",
+      "col": 2,
+      "type": "backend",
+      "label": "Pruebas",
+      "sublabel": "pytest, cobertura 80%"
+    },
+    {
+      "id": "build",
+      "lane": "ci",
+      "col": 3,
+      "type": "cloud",
+      "label": "Build",
+      "sublabel": "imagen con SHA",
+      "brand": "docker"
+    },
+    {
+      "id": "aceptacion",
+      "lane": "ci",
+      "col": 4,
+      "type": "backend",
+      "label": "Aceptación",
+      "sublabel": "Selenium"
+    },
+    {
+      "id": "sonar",
+      "lane": "entrega",
+      "col": 4,
+      "type": "security",
+      "label": "Quality Gate",
+      "sublabel": "SonarCloud",
+      "tag": "bloqueante"
+    },
+    {
+      "id": "push",
+      "width": 100,
+      "lane": "entrega",
+      "col": 5,
+      "type": "database",
+      "label": "Publicar",
+      "sublabel": "Docker Hub: sha + latest",
+      "brand": "docker",
+      "tag": "solo main"
+    },
+    {
+      "id": "rojo",
+      "lane": "fallo",
+      "col": 2,
+      "type": "security",
+      "label": "Pipeline rojo",
+      "sublabel": "merge bloqueado"
+    }
+  ],
+  "edges": [
+    {
+      "from": "codigo",
+      "to": "pr",
+      "label": "push rama"
+    },
+    {
+      "from": "pr",
+      "to": "lint",
+      "label": "dispara"
+    },
+    {
+      "from": "lint",
+      "to": "pruebas"
+    },
+    {
+      "from": "pruebas",
+      "to": "build"
+    },
+    {
+      "from": "build",
+      "to": "aceptacion"
+    },
+    {
+      "from": "aceptacion",
+      "to": "sonar",
+      "label": "reportes"
+    },
+    {
+      "from": "sonar",
+      "to": "push",
+      "label": "OK"
+    },
+    {
+      "from": "pruebas",
+      "to": "rojo",
+      "label": "falla",
+      "role": "error",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Integración continua",
+      "items": [
+        "Cada push y PR corre el pipeline",
+        "main solo acepta PR aprobados y en verde"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Puntos de parada",
+      "items": [
+        "Lint, pruebas o Selenium en rojo",
+        "Quality Gate de SonarCloud no aprobado"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Entrega",
+      "items": [
+        "Se publica la misma imagen probada",
+        "Secretos en GitHub Secrets"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.DS_Store
+.claude/settings.local.json
+*.pem
+.env
+*.local
+credentials
+venv/
+.venv/
+node_modules/
+dist/
+__pycache__/
+# apps con repo propio en GitHub
+assignments/01-taller-entregable-1/entregable-1-cicd/
+assignments/02-actividad-clase-ci/lista-tareas-ci/
+assignments/03-taller-entregable-2/cicd-pipeline-python/
+assignments/04-proyecto-final/decisiones-app/

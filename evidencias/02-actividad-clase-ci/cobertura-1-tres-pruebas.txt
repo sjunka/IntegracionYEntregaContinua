@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.2.0, pluggy-1.7.0
+rootdir: /Users/sjunka/Documents/IntegracionYEntregaContinua/assignments/02-actividad-clase-ci/lista-tareas-ci
+configfile: pytest.ini
+plugins: cov-7.1.0
+collected 3 items
+
+tests/test_app.py ...                                                    [100%]
+
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.12.14-final-0 _______________
+
+Name     Stmts   Miss Branch BrPart  Cover   Missing
+----------------------------------------------------
+app.py      22      2      4      2    85%   21, 30
+----------------------------------------------------
+TOTAL       22      2      4      2    85%
+============================== 3 passed in 0.37s ===============================
