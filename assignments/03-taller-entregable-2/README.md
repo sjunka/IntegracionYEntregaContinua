@@ -16,12 +16,12 @@
 - [x] `main` protegida con la regla `proteger-main` (PR, 1 aprobación, check `build-and-test`, sin bypass)
 - [~] PR #1 (sección 9): 3 pruebas nuevas, ejecución fallida por error intencional, ejecución final en verde. FALTA aprobación y merge de otro integrante.
 - [~] README (PR #2): integrantes, evidencias y 6 respuestas. FALTA aprobación y merge, nombres de compañeros y su parte de la pregunta 4.
-- [ ] `AUTOR` y sección Integrantes con los 3 nombres completos (hoy solo "Sergio Junca")
+- [x] `AUTOR` e Integrantes con los 2 nombres completos (commit `3465080` en `docs/readme`). Equipo de 2: confirmar con el profesor (la guía pide 3)
 
 ## Pendiente con el equipo
 
 1. Agregar a los 2 compañeros como colaboradores (Settings > Collaborators) y que acepten la invitación.
-2. En la rama `docs/readme` (PR #2): poner los 3 nombres en `AUTOR` (`app/calculadora.py`) y en Integrantes del README, mismo texto y orden, separados por " | ". Cada compañero agrega su problema o aprendizaje en la pregunta 4.
+2. En la rama `docs/readme` (PR #2): poner los 2 nombres en `AUTOR` (`app/calculadora.py`) y en Integrantes del README, mismo texto y orden, separados por " | ". Cada compañero agrega su problema o aprendizaje en la pregunta 4.
 3. Un compañero aprueba PR #1 y PR #2 (Files changed > Review changes > Approve) y hace merge.
 4. Verificar en incógnito: repo, SonarCloud y Docker Hub públicos; última ejecución de `main` en verde; etiqueta SHA del último commit de `main` en Docker Hub.
 5. Cada integrante entrega en Interactiva (buzón Entregable 2) el texto de abajo.

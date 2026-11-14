@@ -1,7 +1,7 @@
 # Taller Entregable 3 - CD con AWS ECS y Terraform
 
 - Enunciado: https://github.com/danielr9911/cicd-workshops/blob/main/Taller-Entregable3.md
-- Peso: 25%. Fecha: 2026-11-15 (tentativa). Equipo de 3 (los mismos del Taller 2): Sergio Alfredo Junca Valero, Valeria Cardona Urrea y tercer integrante pendiente.
+- Peso: 25%. Fecha: 2026-11-15 (tentativa). Equipo de 2 (los mismos del Taller 2): Sergio Alfredo Junca Valero y Valeria Cardona Urrea.
 - Repo (propietario Sergio): https://github.com/sjunka/cicd-pipeline-python-cd (vacío, sin push todavía)
 - Código local: `cicd-pipeline-python-cd/` (3 commits locales; la rama `feature/nuevas-operaciones` tiene potencia y modulo, sin subir)
 

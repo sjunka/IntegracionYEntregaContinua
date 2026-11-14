@@ -13,6 +13,8 @@ Tareas, fechas y entregas van en `board.md`. Clases recientes arriba.
 - Sergio Alfredo Junca Valero
 - Valeria Cardona Urrea (GitHub: valri2104)
 
+Equipo de 2 integrantes.
+
 Usar estos nombres en `AUTOR`, README y diapositivas del Taller 3 y del proyecto final.
 
 ---
