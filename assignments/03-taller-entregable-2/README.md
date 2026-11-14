@@ -1,7 +1,7 @@
 # Taller Entregable 2 - Pipeline de CI con GitHub Actions, Docker y SonarCloud
 
 - Enunciado: https://github.com/danielr9911/cicd-workshops/blob/main/Taller-Entregable-2.md
-- Peso: 25%. Fecha: 2026-11-14. Equipos de 3 (otra cantidad requiere autorización del profesor).
+- Peso: 25%. Fecha: 2026-11-14. Equipos de 3 (otra cantidad requiere autorización del profesor). Nuestro equipo de 2 está autorizado.
 - Repo (propietario Sergio): https://github.com/sjunka/cicd-pipeline-python
 - Código local: `cicd-pipeline-python/` (entorno: `uv venv venv --managed-python --python 3.13`)
 - Evidencias locales: `evidencias/03-taller-entregable-2/`
@@ -16,7 +16,7 @@
 - [x] `main` protegida con la regla `proteger-main` (PR, 1 aprobación, check `build-and-test`, sin bypass)
 - [x] PR #1 (sección 9): 3 pruebas nuevas, ejecución fallida y final en verde. Aprobado y mergeado por valri2104 el 2026-11-14 (`1f7e5e9`).
 - [~] README (PR #2): integrantes, evidencias y 6 respuestas. Aprobado y mergeado por valri2104 el 2026-11-14 (`9ed6137`). FALTA el problema o aprendizaje de Valeria en la pregunta 4.
-- [x] `AUTOR` e Integrantes con los 2 nombres completos (en `main`). Equipo de 2: confirmar con el profesor (la guía pide 3)
+- [x] `AUTOR` e Integrantes con los 2 nombres completos (en `main`). Equipo de 2 autorizado por el profesor y registrado por Teams (2026-11-14)
 
 ## Pendiente con el equipo
 
