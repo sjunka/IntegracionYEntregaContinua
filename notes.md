@@ -19,6 +19,182 @@ Usar estos nombres en `AUTOR`, README y diapositivas del Taller 3 y del proyecto
 
 ---
 
+## 2026-11-20 - Clase
+
+### Objetivo del curso
+
+Parte del objetivo del curso es tener criterio para justificar las decisiones.
+
+> **Complemento**
+>
+> - En CI/CD casi toda decisión es un trade-off: velocidad vs. riesgo, costo vs. fidelidad de ambientes, Delivery (aprobación manual) vs. Deployment (automático).
+> - Una forma concreta de justificar: decisión + alternativa descartada + métrica que la respalda (p. ej. métricas DORA: frecuencia de despliegue, lead time, tasa de fallo de cambios, tiempo de recuperación).
+> - En los talleres: explicar en el README por qué se eligió cada herramienta o paso del pipeline, no solo qué hace.
+
+### Contexto es rey: adaptando el pipeline CI/CD
+
+Factores clave:
+
+- Complejidad de la aplicación: monolito vs. microservicios.
+- Criticidad del negocio.
+- Madurez del equipo y de la organización.
+- Requerimientos regulatorios.
+- Tolerancia al riesgo.
+
+Perfiles: startup, SaaS estable, regulado, crítico.
+
+- Startup: prioriza velocidad. Pipeline corto, menos pruebas formales, despliegue manual simple.
+- SaaS: balance entre velocidad y seguridad. Pipeline largo, pruebas robustas, estrategias de despliegue automáticas con observabilidad.
+- Regulado / crítico: prioriza seguridad, cumplimiento y estabilidad. Pipeline largo, pruebas exhaustivas, múltiples aprobaciones manuales, despliegues controlados, auditoría férrea.
+
+> **Complemento**
+>
+> - Startup: pocas pruebas pero rápidas (unitarias + lint), despliegue manual con un comando o botón; a medida que crece conviene automatizarlo. Feature flags ayudan a ir rápido sin romper a todos.
+> - SaaS estable: pipeline completo (unit, integración, SAST, staging), despliegues canary o blue-green, rollback automático.
+> - Regulado (banca, salud; p. ej. Superfinanciera): Continuous Delivery con aprobación manual documentada, trazabilidad (quién aprobó qué versión), escaneo de seguridad obligatorio, separación de funciones.
+> - Crítico (aviación, energía, pagos core): más gates, pruebas de rendimiento y caos, despliegues graduales y ventanas controladas; prioriza estabilidad sobre frecuencia.
+> - Monolito: un solo pipeline, build más largo. Microservicios: un pipeline por servicio, despliegue independiente, pero exige pruebas de contrato (Pact) y más observabilidad.
+> - Relación con el proyecto final (votaciones-cicd): staging + aprobación hacia producción + rollback lo ubica cerca del perfil "SaaS estable".
+
+### NoOps y NewOps
+
+NoOps: visión y futura aspiración. NewOps: evolución rápida del rol de operaciones.
+
+NoOps:
+
+- Idea: con automatización suficiente no se necesita un equipo de operaciones tradicional; se reduce drásticamente o desaparece.
+- Los desarrolladores gestionan todo el ciclo: *you build it, you run it*.
+- Realidad: a menudo es una simplificación exagerada. La complejidad operativa no desaparece, se transforma: en la plataforma, en la automatización, en la observabilidad y en los lineamientos y definiciones.
+
+NewOps:
+
+- El rol de operaciones evoluciona, no muere: pasa de tareas manuales y reactivas a ingeniería proactiva.
+- Enfoque en construir y mantener plataformas internas.
+- Ingeniería de plataformas: crear las herramientas de automatización y plataformas de autoservicio.
+- Ingeniería de fiabilidad del sitio (SRE, *Site Reliability Engineering*): aplicar principios de ingeniería de software, reglas y lineamientos para hacer los sistemas productivos más fiables, escalables y eficientes; gestionar incidentes y automatizar tareas.
+- Maestría en automatización y observabilidad.
+
+### DORA
+
+DORA saca reportes e informes de cómo están trabajando las empresas.
+
+Métricas DORA: frecuencia de despliegue, lead time, tasa de fallo. Unas miden velocidad, otras frecuencia de despliegue.
+
+Métricas DORA (detalle):
+
+- Plazo de entrega (lead time).
+- Frecuencia de implementación.
+- Tiempo de recuperación de implementaciones con errores.
+- Tasa de errores de cambios.
+- Tasa de corrección: frecuencia de implementaciones no planificadas para corregir errores que afectan a usuarios.
+
+Factores: velocidad de la entrega y estabilidad de la entrega de software.
+
+> **Complemento**
+>
+> - RASP (*Runtime Application Self-Protection*): agente dentro de la app que la protege mientras corre en producción; detecta y bloquea ataques (inyección SQL, XSS) en tiempo real.
+> - Comparación: SAST analiza el código sin ejecutar (Sonar); DAST ataca la app desde afuera (OWASP ZAP); IAST es un agente interno durante las pruebas; RASP es un agente interno en producción que además bloquea.
+> - Herramientas: Contrast Protect, Imperva RASP, Datadog ASM.
+> - Trade-off: agrega latencia y depende del lenguaje; no reemplaza SAST ni DAST. Típico en perfiles regulados o críticos.
+
+### DevSecOps: integrando seguridad
+
+- Práctica que integra la seguridad de forma continua en todo el ciclo de vida DevOps, desde el diseño hasta producción y el feedback.
+- Lema: *shift security left*: prácticas de seguridad lo más temprano posible en el ciclo de desarrollo.
+- Objetivo: que la seguridad sea responsabilidad de todos (desarrollo, operaciones y seguridad) y no un cuello de botella.
+
+Fundamentos:
+
+- Automatizar la seguridad.
+- Seguridad como código.
+- Pruebas de seguridad continuas.
+- Monitoreo continuo de seguridad.
+- Cumplimiento continuo.
+- Respuesta rápida a incidentes.
+
+Arsenal de seguridad automatizada:
+
+- Idea / pre-commit: plugins, linters.
+- Build / test: SCA, SAST, IAST.
+- Deploy / operate (vigilancia en producción): DAST, escaneo de contenedores e imágenes, monitoreo de seguridad.
+
+### MLOps: DevOps para machine learning
+
+- Conjunto de prácticas para desplegar y mantener modelos de ML en producción de forma fiable y eficiente.
+- Combina ML, DevOps e ingeniería de datos.
+- Cierra el abismo entre desarrollar un modelo de ML (Jupyter) y operarlo en producción de forma robusta y escalable.
+
+Desafíos:
+
+- Nuevos artefactos.
+- Pruebas complejas.
+- Entrenamiento intensivo.
+- Monitoreo específico.
+- Entornos híbridos.
+
+### IA en CI/CD
+
+Objetivo: hacer pipelines más eficientes, rápidos, seguros y fiables.
+
+IA para CI:
+
+- Generación y autocompletado de código.
+- Generación de pruebas unitarias.
+- Priorización inteligente de pruebas: ejecutar primero los tests con mayor probabilidad de fallar, basándose en los cambios de código.
+- Detección de *flaky tests* (pruebas intermitentes) por análisis de patrones.
+- Optimizar el código: refactorización.
+- Pruebas de mutación.
+
+IA para CD:
+
+- Análisis predictivo de riesgo de release.
+- Canary analysis automatizado.
+- Detección inteligente de anomalías.
+- Optimización de recursos del pipeline.
+
+> **Complemento**
+>
+> - IA para CD, ejemplos: Harness (verificación continua con ML, rollback automático), Kayenta / Argo Rollouts (canary analysis: compara métricas canary vs. baseline), Datadog Watchdog (anomalías).
+> - Herramientas: GitHub Copilot / Claude Code (código y pruebas), Launchable (priorización de tests), Trunk o BuildPulse (flaky tests), Stryker / PIT (pruebas de mutación).
+> - Pruebas de mutación: introducen pequeños cambios (mutantes) en el código y verifican que las pruebas fallen; miden la calidad de las pruebas, no solo la cobertura. Un 98,5 % de cobertura (proyecto final) no garantiza que las pruebas detecten errores.
+> - Trade-off: el código y las pruebas generadas por IA necesitan revisión humana; DORA 2025 reporta que la IA amplifica: mejora equipos con buenas prácticas y empeora la estabilidad donde no las hay.
+
+> **Complemento**
+>
+> - Diferencia con CI/CD clásico: se versiona código **y** datos **y** modelo. Un cambio en los datos puede romper el sistema sin tocar el código.
+> - Pipeline típico: ingesta y validación de datos, entrenamiento, evaluación (métricas vs. modelo actual), registro del modelo, despliegue (canary/shadow), monitoreo de *drift*.
+> - Herramientas: MLflow (registro y tracking), DVC (versionar datos), Kubeflow, SageMaker / Vertex AI.
+> - Nuevo concepto: *continuous training* (CT), reentrenar automáticamente cuando el rendimiento cae.
+
+> **Complemento**
+>
+> - Dónde entra en el pipeline: pre-commit (detección de secretos: gitleaks), CI (SAST: Sonar, Semgrep; dependencias/SCA: Dependabot, Snyk; escaneo de imágenes: Trivy), staging (DAST: OWASP ZAP), producción (RASP, monitoreo).
+> - Por qué a la izquierda: un error de seguridad detectado en el PR cuesta minutos; en producción cuesta un incidente.
+> - Trade-off: muchos escáneres bloqueantes ralentizan el pipeline y generan falsos positivos; conviene bloquear solo severidad alta/crítica y reportar el resto.
+> - En el proyecto final: el Quality Gate de Sonar ya es un control shift-left.
+
+> **Complemento**
+>
+> - Son 4 métricas clásicas, en 2 grupos:
+>   - Velocidad (*throughput*): frecuencia de despliegue y lead time for changes (del commit a producción).
+>   - Estabilidad: tasa de fallo de cambios (*change failure rate*) y tiempo de recuperación (MTTR / *failed deployment recovery time*).
+> - Desde 2024 DORA agrega una quinta: tasa de retrabajo (*rework rate*), despliegues no planeados para corregir errores.
+> - Hallazgo clave de DORA: velocidad y estabilidad no se oponen; los equipos de élite son buenos en ambas.
+> - En el proyecto final: frecuencia = Releases (v1.0.3 a v1.0.18), lead time = duración del run (~9 min 42 s), recuperación = rollback automático.
+
+> **Complemento**
+>
+> - DORA (DevOps Research and Assessment), hoy parte de Google Cloud; publica el informe anual *State of DevOps* / *State of AI-assisted Software Development*.
+> - Ya tenemos en `material-md/`: `SPANISH_2025_abridged_state_of_ai_assisted_software_development_es-419.md`, `2025_dora_ai_capabilities_model.md` y `2026dora-roi-of-ai-assisted-software-development-2026.md`. Relacionado con el foro en `assignments/07-foro-dora/`.
+
+> **Complemento**
+>
+> - NoOps: la plataforma automatiza tanto (serverless, PaaS) que el equipo de desarrollo no necesita operaciones dedicadas. Ej.: AWS Lambda, Vercel, Google Cloud Run. Límite: alguien sigue operando, solo que es el proveedor; costos, observabilidad y seguridad no desaparecen.
+> - NewOps: operaciones no desaparece, cambia de rol: de administrar servidores a construir plataformas internas (platform engineering), SRE, automatización e IaC.
+> - Trade-off: NoOps reduce carga operativa pero aumenta dependencia del proveedor (lock-in) y control limitado.
+
+---
+
 ## 2026-11-14 - Clase
 
 Tema: Continuous Delivery y Continuous Deployment.
