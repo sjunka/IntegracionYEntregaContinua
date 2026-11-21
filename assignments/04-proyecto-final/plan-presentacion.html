@@ -1,0 +1,99 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plan de la presentación</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#14161a;--mu:#5d6470;--ln:#e3e6eb;--ac:#2563eb;--s:#2563eb;--v:#9333ea;--ok:#16a34a;--warn:#dc2626;--hl:#eef4ff}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171a21;--tx:#e8eaee;--mu:#9aa3b2;--ln:#2a2f3a;--ac:#60a5fa;--s:#60a5fa;--v:#c084fc;--ok:#4ade80;--warn:#f87171;--hl:#1c2433}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:26px;margin:0;letter-spacing:-.02em}.sub{color:var(--mu);margin-top:4px}
+.clock{font-variant-numeric:tabular-nums;text-align:right}.clock b{font-size:30px;display:block}
+.clock button{font:inherit;font-size:13px;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:8px;padding:5px 10px;cursor:pointer;margin-left:4px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin:26px 0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:720px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:14px 16px}
+.card h3{margin:0 0 8px;font-size:15px}
+a{color:var(--ac);text-decoration:none;font-weight:600}a:hover{text-decoration:underline}
+label.chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}label.chk input{margin-top:3px;width:17px;height:17px;accent-color:var(--ok)}
+label.chk input:checked+span{color:var(--mu);text-decoration:line-through}
+.tabs a{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--ln)}.tabs a:last-child{border:0}.tabs small{color:var(--mu);font-weight:400}
+.steps{display:flex;flex-direction:column;gap:8px}
+.step{display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:start;background:var(--card);border:1px solid var(--ln);border-left:4px solid var(--c);border-radius:10px;padding:12px 14px;cursor:pointer;transition:background .15s}
+.step:hover{background:var(--hl)}.step.done{opacity:.45}.step.cur{outline:2px solid var(--c)}
+.n{font-size:20px;font-weight:700;color:var(--c);font-variant-numeric:tabular-nums}
+.who{display:inline-block;font-size:12px;font-weight:700;color:#fff;background:var(--c);border-radius:20px;padding:1px 9px;margin-right:6px}
+.view{font-size:16px}.what{color:var(--mu);margin-top:3px}.what a{font-weight:600}
+.t{font-variant-numeric:tabular-nums;color:var(--mu);font-size:14px;text-align:right}
+.S{--c:var(--s)}.V{--c:var(--v)}
+.alert{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 8%,var(--card))}
+ul{margin:0;padding-left:18px}li{margin:4px 0}
+.hint{color:var(--mu);font-size:13px;margin-top:6px}
+</style></head><body><div class="wrap">
+<header><div><h1>Plan de la presentación</h1>
+<div class="sub">Proyecto final CI/CD · Sábado 21 nov, 8 am · 10 min + 5 de preguntas · <span class="who S" style="background:var(--s)">Sergio</span><span class="who V" style="background:var(--v)">Valeria</span></div></div>
+<div class="clock"><b id="clk">0:00 / 9:10</b><button id="go">Iniciar</button><button id="rs">Reiniciar</button></div></header>
+
+<div class="grid">
+<div class="card"><h3>1. Antes de salir (7:00 am)</h3>
+<label class="chk"><input type="checkbox" data-k="c1"><span>Health de <a target="_blank" href="http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com/api/health">staging</a> y <a target="_blank" href="http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com/api/health">producción</a>: v1.0.20 y database ok</span></label>
+<label class="chk"><input type="checkbox" data-k="c2"><span>Probar el QR de la <a target="_blank" href="http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com/p/G8mR9uj4">encuesta de producción</a> con el celular</span></label>
+<label class="chk"><input type="checkbox" data-k="c3"><span>Abrir el <a target="_blank" href="https://sonarcloud.io/project/overview?id=sjunka_votaciones-cicd">SonarCloud</a> una vez (Passed, 98,5 %)</span></label>
+<label class="chk"><input type="checkbox" data-k="c4"><span>Cargador y adaptador HDMI / USB-C</span></label>
+</div>
+<div class="card tabs"><h3>2. Pestañas abiertas, en orden</h3>
+<a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/resumen">App de sustentación <small>vista Resumen</small></a>
+<a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44840313582">Run 44840313582 <small>verde, v1.0.20 + Discord</small></a>
+<a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44348025068">Run 44348025068 <small>verde completo</small></a>
+<a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44340166676">Run 44340166676 <small>rollback automático</small></a>
+<a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44344815777">Run 44344815777 <small>botón de pánico</small></a>
+<a target="_blank" href="https://github.com/sjunka/votaciones-cicd/releases">Releases <small>v1.0.3 a v1.0.20</small></a>
+<a target="_blank" href="http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com/p/G8mR9uj4">Producción <small>encuesta /p/G8mR9uj4</small></a>
+<a target="_blank" href="http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com">Staging <small>al lado de producción</small></a>
+<a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/workflows/panic-rollback.yml">Botón de pánico <small>Run workflow, ambiente staging</small></a>
+<a target="_blank" href="https://discord.com/channels/@me">Discord <small>canal de avisos</small></a>
+</div></div>
+
+<h2>3. Paso a paso en el salón · clic en la tarjeta = paso actual</h2>
+<div class="steps" id="steps"></div>
+<p class="hint">Atajos: flecha derecha / espacio avanza, flecha izquierda retrocede. El enlace azul abre la vista en una pestaña nueva.</p>
+
+<div class="grid" style="margin-top:14px">
+<div class="card"><h3>4. En preguntas (5 min)</h3><ul>
+<li>¿Por qué Actions y no CircleCI? <a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/alternativas">Alternativas</a></li>
+<li>¿Cumple la rúbrica? <a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/rubrica">Rúbrica</a> · <a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/evidencia">Evidencia</a></li>
+<li>Discord: activo, el aviso de la v1.0.20 llegó a #general (run 44840313582); es un extra, no cuenta como modificación.</li>
+<li>Calidad: <a target="_blank" href="https://sonarcloud.io/project/overview?id=sjunka_votaciones-cicd">SonarCloud</a> Passed, 98,5 % de cobertura.</li></ul></div>
+<div class="card"><h3>5. Plan B</h3><ul>
+<li>Sin internet o AWS caído: capturas de la app y el <a target="_blank" href="https://github.com/sjunka/votaciones-cicd/blob/main/docs/reporte-proyecto-final.pdf">PDF del reporte</a>.</li>
+<li>Falla el QR: votar en la <a target="_blank" href="http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com/p/G8mR9uj4">encuesta</a> desde el portátil.</li>
+<li>Vamos tarde: saltar demo paso 2 y Aprendizajes.</li></ul></div>
+</div>
+<div class="card alert" style="margin-top:14px"><b>Después de exponer:</b> terraform destroy en production y staging; borrar bucket tfstate, LabRole, usuario IAM y tokens. AWS cobra ~US$3/día.</div>
+</div>
+<script>
+const A='https://sjunka.github.io/votaciones-cicd/',R='https://github.com/sjunka/votaciones-cicd/actions/runs/',P='http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com',ST='http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com';
+const l=(u,t)=>`<a target="_blank" href="${u}">${t}</a>`;
+const steps=[
+['S','Resumen','#/resumen',`<b>Antes de hablar:</b> lanzar el ${l('https://github.com/sjunka/votaciones-cicd/actions/workflows/panic-rollback.yml','botón de pánico')} con ambiente <b>staging</b> (tarda ~4 min). Luego recorrer las tarjetas y terminar en la línea de tiempo.`,45],
+['S','Artefacto','#/artefacto','Señalar las 3 piezas: web, API, DynamoDB.',40],
+['S','Ramas','#/ramas?esc=pr&paso=1','Escenario Pull request, pasos 1-4 (rama, PR, check, ruleset). Luego Merge a main, paso 4: la versión.',45],
+['V','Pipeline','#/pipeline?esc=normal&paso=1','Pasos 1-4 build-and-test, 5-6 staging, 7 aprobación manual, 8-10 producción, smoke y release.',65],
+['S','Arquitectura','#/arquitectura?esc=ambiente&paso=1','Escenario Ambiente, pasos 1-4 de izquierda a derecha; 5+ Docker Hub, S3, CloudWatch. Luego Dos ambientes.',50],
+['V','Pruebas','#/pruebas','Recorrer la tabla por la columna Dónde.',45],
+['S','Rollback','#/rollback?esc=auto&paso=1','Rollback automático pasos 1-3. Luego escenario Botón de pánico y mostrar el run de staging lanzado al inicio, en vivo.',55],
+['V','Modificaciones','#/modificaciones','Una tarjeta por modificación: DevSecOps (gitleaks + Trivy), SemVer + Releases, deploy.yml reutilizable.',45],
+['V','Evidencia','#/evidencia',`Abrir el run ${l(R+'44348025068','44348025068')} y luego el ${l(R+'44340166676','44340166676')}.`,40],
+['S','Demo en vivo','#/evidencia',`1) QR de ${l(P+'/p/G8mR9uj4','producción')}: el salón vota "¿GitHub Actions o CircleCI?". 2) Abrir Discord: el aviso del rollback de staging que llegó en vivo (y el de v1.0.20). 3) Pánico: NO lanzarlo, abrir el run ${l(R+'44344815777','44344815777')}.`,75],
+['S','Aprendizajes','#/aprendizajes','Turnarse tarjeta por tarjeta con Valeria.',35],
+['V','Rúbrica / Cierre','#/rubrica','Abrir Rúbrica (14 criterios), cerrar y pasar a preguntas.',10]];
+const f=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+let acc=0;const el=document.getElementById('steps');
+steps.forEach(([w,v,r,d,t],i)=>{acc+=t;const n=document.createElement('div');n.className='step '+w;n.innerHTML=`<div class="n">${i+1}</div><div><span class="who">${w=='S'?'Sergio':'Valeria'}</span><span class="view">${l(A+r,v)}</span><div class="what">${d}</div></div><div class="t">${f(t)}<br><small>hasta ${f(acc)}</small></div>`;n.onclick=e=>{if(e.target.tagName!='A')set(i)};el.appendChild(n)});
+let cur=-1;const set=i=>{cur=Math.max(-1,Math.min(steps.length-1,i));[...el.children].forEach((c,j)=>{c.classList.toggle('cur',j==cur);c.classList.toggle('done',j<cur)});if(cur>=0)el.children[cur].scrollIntoView({block:'nearest',behavior:'smooth'})};
+addEventListener('keydown',e=>{if(e.key=='ArrowRight'||e.key==' '){e.preventDefault();set(cur+1)}if(e.key=='ArrowLeft')set(cur-1)});
+let sec=0,tm=null;const clk=document.getElementById('clk'),go=document.getElementById('go');
+const draw=()=>{clk.textContent=f(sec)+' / 9:10';clk.style.color=sec>550?'var(--warn)':''};
+go.onclick=()=>{if(tm){clearInterval(tm);tm=null;go.textContent='Seguir'}else{tm=setInterval(()=>{sec++;draw()},1000);go.textContent='Pausar'}};
+document.getElementById('rs').onclick=()=>{clearInterval(tm);tm=null;sec=0;draw();go.textContent='Iniciar';set(-1)};
+document.querySelectorAll('[data-k]').forEach(c=>{try{c.checked=localStorage.getItem(c.dataset.k)=='1'}catch(e){}c.onchange=()=>{try{localStorage.setItem(c.dataset.k,c.checked?'1':'0')}catch(e){}}});
+</script></body></html>

@@ -2,18 +2,22 @@
 
 ## En curso
 
-- Proyecto final expuesto el 2026-11-21 (PR 14 mergeado en vivo, v1.0.39 en producción). Nota pendiente.
-- Todo cerrado para no pagar: Terraform destruido (staging y production), bucket `tfstate-votaciones-sjunka`, `LabRole`, usuario IAM `github-cicd-votaciones`, Lambda `pipeline-vivo` (rol y log group), secretos del repo `sjunka/votaciones-cicd`, servidor Discord `votaciones-cicd` y los 3 tokens de Docker Hub. Barrido de todas las regiones sin EC2, EIP, NAT ni volúmenes.
-- Sigue publicado (gratis): repo público y sustentación en GitHub Pages. Las URLs de staging, producción y En vivo ya no responden.
+- Proyecto final expuesto el 2026-11-21: PR 14 (`demo-sustentacion`) mergeado en vivo a las 15:26 UTC, v1.0.39 en producción. Nota pendiente.
+- Repo `sjunka/votaciones-cicd`: sin PR abiertos; ramas remotas `demo-sustentacion` y `guion-version-actual` ya mergeadas por squash (se pueden borrar). Dashboard de respaldo commiteado (51b5d95).
+- Todo cerrado para no pagar: Terraform destruido (staging y production, 16+16), bucket `tfstate-votaciones-sjunka` (con versiones), `LabRole`, usuario IAM `github-cicd-votaciones`, Lambda `pipeline-vivo` (rol y log group), 5 secretos del repo, servidor Discord `votaciones-cicd`, 3 tokens de Docker Hub. Barrido de todas las regiones sin EC2, EIP, NAT ni volúmenes; us-east-1 sin CloudFront, ELB, ECS, RDS, Secrets, ECR, DynamoDB ni S3.
+- Sigue publicado (gratis): repo público y sustentación en GitHub Pages. Staging, producción y En vivo ya no responden.
 
 ## Siguiente paso
 
-1. Revocar el token de SonarCloud (My Account > Security, entrar con GitHub).
-2. Cerrar a mano las pestañas del grupo de Claude de la sesión anterior en Chrome.
-3. Foro DORA: confirmar si se publicó `assignments/07-foro-dora/borrador-aporte.md` en Interactiva (vencía hoy) y actualizar la fila 4 de `board.md`.
-4. Anotar la nota del proyecto final en `board.md` cuando llegue.
-5. Revisar la factura de noviembre en AWS Billing (Cost Explorer no está habilitado).
-6. Commitear el repo del curso si Sergio lo pide (solo archivos propios).
+1. Foro DORA: confirmar si se publicó `assignments/07-foro-dora/borrador-aporte.md` en Interactiva (vencía hoy) y actualizar la fila 4 de `board.md`.
+2. Anotar la nota del proyecto final en `board.md` cuando llegue.
+3. Revisar la factura de noviembre en AWS Billing.
+
+## Bloqueos
+
+- Sergio: revocar el token de SonarCloud (My Account > Security, entrar con GitHub).
+- Sergio: cerrar a mano el grupo de pestañas de Claude de la sesión anterior en Chrome.
+- Profe: nota del proyecto final y del foro.
 
 ## Archivos clave
 

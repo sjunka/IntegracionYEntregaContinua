@@ -6,6 +6,10 @@ Vie 6-9 pm, Sáb 8 am-1 pm, 6 nov - 21 nov 2026
 Aquí va lo que dice el profesor: conceptos, ejemplos, aclaraciones.
 Tareas, fechas y entregas van en `board.md`. Clases recientes arriba.
 
+## 2026-11-21 - Corrección del profe (foro DORA)
+
+- "Corrección: Páginas para enfocarse (cómo mínimo) de la página 7 a la 22, del documento principal (el que está en español)."
+
 ---
 
 ## Equipo (para entregas)

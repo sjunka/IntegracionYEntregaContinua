@@ -1,0 +1,67 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Plan de la presentación</title>
+<style>
+@page{size:letter;margin:12mm}
+body{font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:10.2px;color:#111;line-height:1.3;margin:0}
+h1{font-size:17px;margin:0 0 2px}.sub{color:#555;margin-bottom:6px}
+h2{font-size:12px;margin:8px 0 3px;border-bottom:1.5px solid #222;padding-bottom:1px}
+table{width:100%;border-collapse:collapse}td,th{border:1px solid #bbb;padding:2.5px 4px;vertical-align:top;text-align:left}
+th{background:#eee}.t{white-space:nowrap;text-align:center}.S{color:#0b5394;font-weight:600}.V{color:#8a2be2;font-weight:600}
+.cols{display:flex;gap:10px}.cols>div{flex:1}ul,ol{margin:2px 0;padding-left:16px}li{margin:1px 0}
+.box{border:1.5px solid #c00;padding:4px 6px;margin-top:6px}
+a{color:#0b5394}</style>
+<h1>Plan de la presentación: proyecto final CI/CD</h1>
+<div class="sub">Sábado 21 nov 2026, 8 am. 10 min de exposición + 5 de preguntas. Sergio (<span class="S">S</span>) y Valeria (<span class="V">V</span>). Todo se muestra desde la app: <a target="_blank" href="https://sjunka.github.io/votaciones-cicd/">sjunka.github.io/votaciones-cicd</a></div>
+
+<div class="cols"><div>
+<h2>1. Antes de salir (7:00 am)</h2>
+<ol>
+<li>Abrir /api/health de <a target="_blank" href="http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com/api/health">staging</a> y <a target="_blank" href="http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com/api/health">producción</a>: deben decir v1.0.18 y database ok.</li>
+<li>Probar el QR de la encuesta de producción (<a target="_blank" href="http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com/p/G8mR9uj4">/p/G8mR9uj4</a>) con el celular.</li>
+<li>Cargador del portátil y adaptador HDMI / USB-C.</li>
+</ol>
+</div><div>
+<h2>2. Pestañas abiertas en este orden</h2>
+<ol>
+<li><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/resumen">App de sustentación (vista Resumen)</a></li>
+<li>Run <a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44809582134">44809582134</a> (verde, v1.0.18) y <a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44348025068">44348025068</a> (verde completo)</li>
+<li>Run <a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44340166676">44340166676</a> (rollback automático) y <a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44344815777">44344815777</a> (botón de pánico)</li>
+<li><a target="_blank" href="https://github.com/sjunka/votaciones-cicd/releases">Releases del repo</a></li>
+<li><a target="_blank" href="http://votaciones-production-alb-267954360.us-east-1.elb.amazonaws.com/p/G8mR9uj4">Producción (encuesta)</a> y <a target="_blank" href="http://votaciones-staging-alb-1433721465.us-east-1.elb.amazonaws.com">staging</a></li>
+</ol>
+</div></div>
+
+<h2>3. Paso a paso en el salón</h2>
+<table>
+<tr><th>#</th><th>Quién</th><th>Vista de la app</th><th>Qué mostrar / qué clic</th><th class="t">Min</th></tr>
+<tr><td>1</td><td class="S">S</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/resumen">Resumen</a></td><td>Recorrer las tarjetas y terminar en la línea de tiempo.</td><td class="t">0:45</td></tr>
+<tr><td>2</td><td class="S">S</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/artefacto">Artefacto</a></td><td>Señalar las 3 piezas: web, API, DynamoDB.</td><td class="t">0:40</td></tr>
+<tr><td>3</td><td class="S">S</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/ramas?esc=pr&paso=1">Ramas</a></td><td>Escenario Pull request, pasos 1 a 4 (rama, PR, check, ruleset). Luego Merge a main, paso 4: la versión.</td><td class="t">0:45</td></tr>
+<tr><td>4</td><td class="V">V</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/pipeline?esc=normal&paso=1">Pipeline</a></td><td>Flujo normal: pasos 1-4 build-and-test, 5-6 staging, 7 aprobación manual, 8-10 producción, smoke y release.</td><td class="t">1:05</td></tr>
+<tr><td>5</td><td class="S">S</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/arquitectura?esc=ambiente&paso=1">Arquitectura</a></td><td>Escenario Ambiente, pasos 1-4 de izquierda a derecha, 5+ Docker Hub, S3, CloudWatch. Luego Dos ambientes.</td><td class="t">0:50</td></tr>
+<tr><td>6</td><td class="V">V</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/pruebas">Pruebas</a></td><td>Recorrer la tabla por la columna Dónde.</td><td class="t">0:45</td></tr>
+<tr><td>7</td><td class="S">S</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/rollback?esc=auto&paso=1">Rollback</a></td><td>Rollback automático pasos 1-3. Luego escenario Botón de pánico.</td><td class="t">0:55</td></tr>
+<tr><td>8</td><td class="V">V</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/modificaciones">Modificaciones</a></td><td>Una tarjeta por modificación con su enlace: DevSecOps (gitleaks + Trivy), SemVer + Releases, deploy.yml reutilizable.</td><td class="t">0:45</td></tr>
+<tr><td>9</td><td class="V">V</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/evidencia">Evidencia</a></td><td>Cambiar a la pestaña del run <a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44348025068">44348025068</a> y luego al <a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44340166676">44340166676</a>.</td><td class="t">0:40</td></tr>
+<tr><td>10</td><td class="S">S</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/evidencia">Demo en vivo</a></td><td>1) QR de producción: el salón vota "¿GitHub Actions o CircleCI?". 2) Staging al lado de producción, ambos v1.0.18. 3) Pánico: NO lanzarlo en vivo (tarda ~4 min), abrir el run <a target="_blank" href="https://github.com/sjunka/votaciones-cicd/actions/runs/44344815777">44344815777</a>.</td><td class="t">1:15</td></tr>
+<tr><td>11</td><td class="S">S</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/aprendizajes">Aprendizajes</a></td><td>Turnarse tarjeta por tarjeta con Valeria.</td><td class="t">0:35</td></tr>
+<tr><td>12</td><td class="V">V</td><td><a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/rubrica">Rúbrica / Cierre</a></td><td>Abrir Rúbrica (14 criterios) y cerrar. Pasar a preguntas.</td><td class="t">0:10</td></tr>
+<tr><th colspan="4" style="text-align:right">Total</th><th class="t">9:10</th></tr>
+</table>
+
+<div class="cols"><div>
+<h2>4. En preguntas (5 min)</h2>
+<ul>
+<li>Responder desde la app: <a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/alternativas">Alternativas</a> (por qué Actions y no CircleCI), <a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/rubrica">Rúbrica</a>, <a target="_blank" href="https://sjunka.github.io/votaciones-cicd/#/evidencia">Evidencia</a>.</li>
+<li>Discord: jobs listos, falta el webhook; no cuenta como modificación.</li>
+<li>Sonar: quality gate Passed, cobertura 98,5 % (<a target="_blank" href="https://sonarcloud.io/project/overview?id=sjunka_votaciones-cicd">SonarCloud</a>).</li>
+</ul>
+</div><div>
+<h2>5. Plan B</h2>
+<ul>
+<li>Sin internet o AWS caído: usar las capturas de la app y <a target="_blank" href="https://github.com/sjunka/votaciones-cicd/blob/main/docs/reporte-proyecto-final.pdf">el PDF del reporte</a>.</li>
+<li>El QR falla: abrir la encuesta en el portátil y votar ahí.</li>
+<li>Vamos tarde: saltar la demo paso 2 y Aprendizajes.</li>
+</ul>
+</div></div>
+<div class="box"><b>Después de exponer:</b> terraform destroy en production y staging, borrar bucket tfstate, LabRole, usuario IAM y tokens (AWS cobra ~US$3/día).</div>
+</html>

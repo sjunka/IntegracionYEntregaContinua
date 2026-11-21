@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Reporte Taller 3</title>
+<style>
+  @page { size: Letter; margin: 16mm 15mm; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; color: #1d2329; line-height: 1.45; }
+  h1 { font-size: 20pt; margin: 0 0 2px; }
+  h2 { font-size: 13.5pt; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 2px solid #2b6cb0; color: #1a4a7a; page-break-after: avoid; }
+  h3 { font-size: 11pt; margin: 14px 0 6px; page-break-after: avoid; }
+  p { margin: 5px 0; }
+  .sub { color: #5a6570; margin: 0 0 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 9.5pt; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+  th, td { border: 1px solid #cfd6dd; padding: 5px 7px; text-align: left; vertical-align: top; }
+  th { background: #eef2f6; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 8.8pt; background: #f1f3f5; padding: 0 3px; border-radius: 3px; }
+  .ok, .fail, .wait, .skip { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 8.5pt; font-weight: 600; white-space: nowrap; }
+  .ok { background: #d9f2df; color: #1e6b33; }
+  .fail { background: #fbdcdc; color: #9b1c1c; }
+  .wait { background: #fff1c9; color: #7a5b00; }
+  .skip { background: #e6e9ed; color: #4a5560; }
+  .box { border: 1px solid #cfd6dd; border-left: 4px solid #2b6cb0; background: #f7f9fb; padding: 8px 12px; margin: 8px 0; page-break-inside: avoid; }
+  .warn { border-left-color: #c58a00; background: #fffaf0; }
+  ol, ul { margin: 4px 0 8px 20px; padding: 0; }
+  li { margin: 2px 0; }
+  .flow { display: flex; align-items: stretch; gap: 4px; margin: 10px 0; page-break-inside: avoid; }
+  .job { flex: 1; border: 1px solid #b9c4cf; border-radius: 6px; padding: 6px; font-size: 8.6pt; text-align: center; background: #fff; }
+  .job b { display: block; font-size: 9pt; margin-bottom: 3px; }
+  .arrow { align-self: center; color: #7a8692; font-size: 13pt; }
+  .gate { background: #fff7e0; border-color: #e0b84a; }
+  .small { font-size: 9pt; color: #5a6570; }
+</style>
+</head>
+<body>
+
+<h1>Taller Entregable 3: Despliegue Continuo en AWS</h1>
+<p class="sub">Integración y Entrega Continua de Software (SI6008), EAFIT. Equipo: Sergio Junca y Valeria Cardona Urrea. Fecha del reporte: 14 nov 2026. Entrega: domingo 15 nov, 11:59 pm.</p>
+
+<div class="box">
+<b>Estado en una línea:</b> el pipeline completo ya corrió en verde en <code>main</code> y la app está viva en Staging y Producción. Falta que Valeria apruebe el PR de las operaciones nuevas, aprobar el paso a Producción, completar el README y entregar en Interactiva.
+</div>
+
+<h2>1. Qué pedía el taller</h2>
+<p>Tomar la calculadora en Flask del Taller 2 (que ya tenía CI: pruebas, SonarCloud y Docker Hub) y agregarle Despliegue Continuo: cada cambio en <code>main</code> se despliega solo a un ambiente de Staging en AWS, se prueba ahí, y luego pasa a Producción. La infraestructura se crea con Terraform (código), no a mano.</p>
+<p>La guía vigente del profesor usa <b>Terraform</b>. Las diapositivas mencionan CloudFormation, pero los criterios de evaluación piden <code>infra/main.tf</code>, así que seguimos la guía.</p>
+
+<h2>2. Arquitectura</h2>
+<table>
+<tr><th>Pieza</th><th>Para qué sirve</th></tr>
+<tr><td>GitHub + GitHub Actions</td><td>Guarda el código y corre el pipeline <code>.github/workflows/ci-cd.yml</code> en cada push.</td></tr>
+<tr><td>SonarCloud</td><td>Analiza calidad y seguridad del código. Si el Quality Gate falla, el pipeline se detiene.</td></tr>
+<tr><td>Docker Hub</td><td>Guarda la imagen de la app. Cada versión lleva la etiqueta del commit (SHA) y <code>latest</code>.</td></tr>
+<tr><td>Terraform + bucket S3</td><td>Crea la infraestructura en AWS. El estado vive en el bucket <code>tfstate-calculadora-sjunka</code> para que el pipeline y cualquier integrante vean lo mismo.</td></tr>
+<tr><td>AWS ECS Fargate</td><td>Corre el contenedor sin administrar servidores. Un servicio por ambiente.</td></tr>
+<tr><td>Application Load Balancer (ALB)</td><td>Da la URL pública y revisa <code>/health</code> cada 30 s. Solo manda tráfico a contenedores sanos.</td></tr>
+<tr><td>CloudWatch Logs</td><td>Guarda los logs del contenedor (7 días).</td></tr>
+</table>
+
+<h2>3. Paso a paso: lo que pedía la guía y lo que hicimos</h2>
+<table>
+<tr><th style="width:11%">Sección</th><th style="width:30%">Qué pide</th><th>Qué hicimos</th><th style="width:11%">Estado</th></tr>
+<tr><td>Prerrequisitos</td><td>AWS CLI, Docker, cuenta AWS Academy</td><td>AWS CLI y Docker listos. Se decidió usar la cuenta AWS personal de Sergio en vez del Learner Lab (ver sección 6).</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.1</td><td>Repo nuevo a partir del Taller 2</td><td>Repo público <code>sjunka/cicd-pipeline-python-cd</code>. Valeria invitada y aceptó.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.2</td><td>SonarCloud, secretos y variables</td><td>Proyecto público, análisis automático apagado, código nuevo = 30 días. Secretos <code>SONAR_TOKEN</code>, <code>DOCKERHUB_TOKEN</code>, variables <code>DOCKERHUB_USERNAME</code>, <code>SONAR_HOST_URL</code>.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.3</td><td>Endpoint <code>/health</code> y nueva imagen</td><td><code>/health</code> responde <code>{"status":"ok","version":"&lt;SHA&gt;"}</code>. Imagen publicada en Docker Hub con <code>latest</code> y SHA.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.4 - 7.5</td><td>Archivos de Terraform</td><td><code>infra/main.tf</code>, <code>variables.tf</code>, <code>outputs.tf</code>, <code>backend.hcl</code>, <code>.terraform.lock.hcl</code>. Crea 9 recursos por ambiente.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.6</td><td>Primer despliegue manual en Staging</td><td>Validado con <code>terraform plan</code> local. El despliegue real lo hizo el pipeline directamente.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.7</td><td>Pruebas de humo y pipeline de 5 jobs</td><td><code>tests/test_smoke_app.py</code> y <code>ci-cd.yml</code> con los 5 jobs.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.8</td><td>Secretos de AWS</td><td><code>AWS_ACCESS_KEY_ID</code> y <code>AWS_SECRET_ACCESS_KEY</code> de un usuario IAM solo para el pipeline.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.9</td><td>Push y verificar los 5 jobs</td><td>Primera ejecución falló en <code>test-staging</code>; se corrigió y la segunda quedó en verde (sección 4).</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.10</td><td>Proteger <code>main</code></td><td>Ruleset <code>proteger-main</code>: PR obligatorio con 1 aprobación y check <code>build-and-test</code>.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.11</td><td>Aprobación manual antes de Producción</td><td>Ambiente <code>production</code> con revisores sjunka y valri2104.</td><td><span class="ok">Hecho</span></td></tr>
+<tr><td>7.12</td><td>2 funciones nuevas por PR</td><td>PR #1: potencia y módulo, con pruebas unitarias, de componente y de aceptación (19 pruebas, cobertura 100%). Check en verde.</td><td><span class="wait">Falta aprobación de Valeria</span></td></tr>
+<tr><td>7.13</td><td>Validación final</td><td>Después del merge y la aprobación de Producción.</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>9.1</td><td>README por PR: integrantes, evidencias, capturas, 7 respuestas</td><td>Integrantes ya están. Borrador de las preguntas 1-5 y 7 listo. Falta la pregunta 6 de cada uno, URLs y capturas.</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>9.2</td><td>Entrega en Interactiva (cada integrante)</td><td>3 URLs: repo, SonarCloud y Docker Hub.</td><td><span class="wait">Pendiente</span></td></tr>
+<tr><td>10</td><td>Destruir la infraestructura</td><td>Después de entregar.</td><td><span class="wait">Pendiente</span></td></tr>
+</table>
+
+<h2>4. El pipeline que se corrió</h2>
+<div class="flow">
+  <div class="job"><b>build-and-test</b>Lint, pruebas, cobertura, SonarCloud, aceptación local, publica imagen</div><div class="arrow">&rarr;</div>
+  <div class="job"><b>deploy-staging</b>terraform apply en workspace staging</div><div class="arrow">&rarr;</div>
+  <div class="job"><b>test-staging</b>Espera el SHA en /health y corre Selenium</div><div class="arrow">&rarr;</div>
+  <div class="job gate"><b>Aprobación</b>Una persona libera (desde 7.11)</div><div class="arrow">&rarr;</div>
+  <div class="job"><b>deploy-production</b>terraform apply en workspace production</div><div class="arrow">&rarr;</div>
+  <div class="job"><b>smoke-test-production</b>Página carga y /health con la versión</div>
+</div>
+<p>La misma imagen (<code>sjunka/cicd-pipeline-python-cd:&lt;SHA&gt;</code>) viaja de un job al otro. Se construye una sola vez; Staging y Producción corren exactamente lo mismo que se probó.</p>
+
+<h3>Ejecución 1: commit 3801904 (falló)</h3>
+<table>
+<tr><th>Job</th><th>Intento 1</th><th>Intento 2</th><th>Qué pasó</th></tr>
+<tr><td>build-and-test</td><td><span class="fail">Falló</span></td><td><span class="ok">Pasó</span></td><td>En el primer análisis SonarCloud no calcula el Quality Gate ("Not computed") y el escáner lo toma como falla. La guía dice volver a correr el job. Al segundo intento pasó.</td></tr>
+<tr><td>deploy-staging</td><td><span class="skip">Omitido</span></td><td><span class="ok">Pasó</span></td><td>Terraform creó Staging en 4 min.</td></tr>
+<tr><td>test-staging</td><td><span class="skip">Omitido</span></td><td><span class="fail">Falló</span></td><td>Las 6 pruebas de Selenium no encontraban el formulario, aunque la app respondía bien.</td></tr>
+<tr><td>deploy-production y smoke</td><td colspan="2"><span class="skip">Omitidos</span></td><td>El pipeline se detiene si Staging falla. Producción no se tocó, que es justo para lo que sirve Staging.</td></tr>
+</table>
+<div class="box warn"><b>Causa y arreglo:</b> Chrome 157 (el del runner) intenta abrir todo por HTTPS. El ALB solo atiende HTTP (puerto 80), así que Chrome mostraba una página en blanco. En local no pasaba porque <code>localhost</code> está exento. Se reprodujo en local contra el ALB y se agregó una línea en <code>tests/test_acceptance_app.py</code>: <code>--disable-features=HttpsFirstBalancedModeAutoEnable</code>. No cambia la app, solo cómo abre el navegador de pruebas.</div>
+
+<div style="page-break-inside:avoid"><h3>Ejecución 2: commit cb30cd3 (todo en verde)</h3>
+<table>
+<tr><th>Job</th><th>Resultado</th><th>Duración</th></tr>
+<tr><td>build-and-test</td><td><span class="ok">Pasó</span></td><td>1 min 47 s</td></tr>
+<tr><td>deploy-staging</td><td><span class="ok">Pasó</span></td><td>2 min 29 s</td></tr>
+<tr><td>test-staging</td><td><span class="ok">Pasó</span></td><td>55 s</td></tr>
+<tr><td>deploy-production</td><td><span class="ok">Pasó</span></td><td>4 min 3 s</td></tr>
+<tr><td>smoke-test-production</td><td><span class="ok">Pasó</span></td><td>16 s</td></tr>
+</table>
+</div><p>Total: unos 10 minutos desde el push hasta Producción. Esta corrida fue sin aprobación manual porque la regla de <code>production</code> se activó después, como pide la guía.</p>
+
+<h3>Ejecución 3: PR #1 (solo CI)</h3>
+<p>En un Pull Request solo corre <code>build-and-test</code> <span class="ok">Pasó</span>. Los despliegues se omiten: nada llega a AWS hasta que el PR se mergea.</p>
+
+<h2>5. Resultados verificados</h2>
+<table>
+<tr><th>Qué</th><th>Resultado</th></tr>
+<tr><td>SonarCloud</td><td>Quality Gate <span class="ok">Passed</span>. Cobertura 100%, 0 bugs, 0 code smells, 0 duplicación, hotspots 100% revisados (no hubo).</td></tr>
+<tr><td>Docker Hub</td><td>Etiquetas <code>latest</code>, <code>3801904...</code> y <code>cb30cd3...</code>.</td></tr>
+<tr><td>Staging y Producción</td><td><code>/health</code> responde <code>ok</code> con el SHA <code>cb30cd3</code> en los dos ambientes.</td></tr>
+<tr><td>Pruebas locales</td><td>Humo 2/2 y aceptación 6/6 contra la imagen local y contra Staging.</td></tr>
+</table>
+<div class="box warn"><b>Ojo:</b> SonarCloud reporta 25 hallazgos de seguridad en el workflow, el Terraform y el Dockerfile (por ejemplo, acciones de GitHub sin fijar por SHA). Vienen del código de la guía y no bloquean el Quality Gate, que solo mide código nuevo con sus condiciones. Sirven de material para la pregunta 5 del README.</div>
+
+<h2>6. Decisiones que se apartan de la guía</h2>
+<table>
+<tr><th>Decisión</th><th>Por qué</th></tr>
+<tr><td>Cuenta AWS personal en vez del Learner Lab</td><td>Decisión de Sergio. Cobra dinero real (estimado US$0.15/hora con los dos ambientes), por eso hay que destruir apenas se entregue.</td></tr>
+<tr><td>Rol <code>LabRole</code> creado a mano</td><td>El Learner Lab ya lo trae. Se creó con el mismo nombre para que <code>main.tf</code> quede igual a la guía.</td></tr>
+<tr><td>Usuario IAM <code>github-cicd-taller3</code></td><td>Para no subir a GitHub la llave de administrador de Sergio. Tiene permisos menores y se borra al final. Sin <code>AWS_SESSION_TOKEN</code> porque las llaves no expiran.</td></tr>
+<tr><td>Flag de Chrome en Selenium</td><td>Sin él, <code>test-staging</code> falla con Chrome 157 (sección 4).</td></tr>
+<tr><td>Equipo de 2</td><td>Autorizado por el profesor. La guía habla de 3 integrantes.</td></tr>
+</table>
+
+<h2>7. Qué sigue para cerrar el ciclo CI/CD</h2>
+<ol>
+<li><b>Valeria</b> aprueba el PR #1 en GitHub.</li>
+<li><b>Merge</b> del PR. Arranca el pipeline en <code>main</code>.</li>
+<li><code>build-and-test</code>, <code>deploy-staging</code> y <code>test-staging</code> corren solos.</li>
+<li>El pipeline se detiene en <b>"Waiting for review"</b>. Sergio o Valeria revisan Staging (potencia y módulo en el navegador) y dan <b>Approve and deploy</b>.</li>
+<li><code>deploy-production</code> y <code>smoke-test-production</code> en verde. Esta es la ejecución que pide la entrega.</li>
+<li>Capturas: la operación nueva en Producción y el Target Group sano en la consola de AWS.</li>
+<li>PR <code>docs/readme</code> con integrantes, URLs, capturas y 7 respuestas (la 6 de cada uno). Valeria lo aprueba y se mergea.</li>
+<li>Cada integrante sube las 3 URLs a Interactiva.</li>
+<li>Destruir la infraestructura (<code>terraform destroy</code> en los dos ambientes), borrar el bucket, el usuario IAM y <code>LabRole</code>. Revocar los tokens <code>EAFIT_TALLER2</code> de SonarCloud y Docker Hub.</li>
+</ol>
+
+<h2>8. Por qué importa cada parte</h2>
+<ul>
+<li><b>Staging:</b> la primera ejecución lo demostró. El fallo apareció en Staging y Producción ni se tocó.</li>
+<li><b>Imagen única por SHA:</b> lo que se aprueba es exactamente lo que llega a Producción.</li>
+<li><b>/health y ALB:</b> el balanceador solo manda tráfico a contenedores sanos. Si una versión nueva no arranca, ECS hace rollback solo (circuit breaker) y el pipeline queda en rojo.</li>
+<li><b>Terraform con estado en S3:</b> la infraestructura se repite igual en los dos ambientes y se borra completa con un comando.</li>
+<li><b>Aprobación manual:</b> convierte el Despliegue Continuo en Entrega Continua. Una persona decide cuándo libera.</li>
+<li><b>Protección de <code>main</code>:</b> nadie mete código sin PR, sin revisión y sin CI en verde.</li>
+</ul>
+
+<h2>9. Enlaces</h2>
+<table>
+<tr><td>Repositorio</td><td><code>https://github.com/sjunka/cicd-pipeline-python-cd</code></td></tr>
+<tr><td>Ejecución en verde</td><td><code>https://github.com/sjunka/cicd-pipeline-python-cd/actions/runs/43627487395</code></td></tr>
+<tr><td>Ejecución con fallo</td><td><code>https://github.com/sjunka/cicd-pipeline-python-cd/actions/runs/43626472608</code></td></tr>
+<tr><td>PR #1</td><td><code>https://github.com/sjunka/cicd-pipeline-python-cd/pull/1</code></td></tr>
+<tr><td>SonarCloud</td><td><code>https://sonarcloud.io/project/overview?id=sjunka_cicd-pipeline-python-cd</code></td></tr>
+<tr><td>Docker Hub</td><td><code>sjunka/cicd-pipeline-python-cd</code></td></tr>
+<tr><td>Staging</td><td><code>http://calculadora-staging-alb-318186033.us-east-1.elb.amazonaws.com</code></td></tr>
+<tr><td>Producción</td><td><code>http://calculadora-production-alb-1232478530.us-east-1.elb.amazonaws.com</code></td></tr>
+<tr><td>Guía</td><td><code>https://github.com/danielr9911/cicd-workshops/blob/main/Taller-Entregable3.md</code></td></tr>
+</table>
+
+</body>
+</html>

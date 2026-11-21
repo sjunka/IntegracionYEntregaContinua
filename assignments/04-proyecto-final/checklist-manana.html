@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checklist sustentación</title>
+<style>
+  :root { --bg:#fbfaf7; --fg:#1d1d1f; --muted:#6b6b70; --line:#e3e1db; --accent:#2f6fe4; --ok:#1f8a4c; --warn:#b26b00; --card:#fff; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#17171a; --fg:#ececef; --muted:#a0a0a8; --line:#2e2e33; --accent:#6d9bff; --ok:#46c07a; --warn:#f0a531; --card:#1f1f23; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:17px/1.5 -apple-system, system-ui, "Segoe UI", sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:26px; margin:0 0 4px; }
+  h2 { font-size:19px; margin:32px 0 8px; padding-bottom:6px; border-bottom:1px solid var(--line); }
+  .sub { color:var(--muted); margin:0 0 8px; }
+  ol, ul { padding-left:0; list-style:none; margin:0; }
+  li { margin:0; }
+  label { display:flex; gap:12px; align-items:flex-start; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--card); margin:6px 0; cursor:pointer; }
+  label input { width:22px; height:22px; margin-top:2px; flex:none; accent-color:var(--ok); }
+  label:has(input:checked) { opacity:.55; }
+  label:has(input:checked) .t { text-decoration:line-through; }
+  .t b { font-weight:650; }
+  .min { display:inline-block; min-width:52px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .key { border-left:4px solid var(--warn); }
+  code { font:14px/1.4 ui-monospace, Menlo, monospace; background:rgba(127,127,127,.14); padding:1px 5px; border-radius:5px; word-break:break-all; }
+  a { color:var(--accent); word-break:break-all; }
+  .done { color:var(--ok); }
+  .done li { padding:4px 0 4px 26px; position:relative; }
+  .done li::before { content:"✓"; position:absolute; left:4px; font-weight:700; }
+  .done span { color:var(--fg); }
+  .plain li { padding:6px 0; border-bottom:1px dashed var(--line); }
+  pre { white-space:pre-wrap; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; font:13px/1.45 ui-monospace, Menlo, monospace; max-height:340px; overflow:auto; }
+  button { font:inherit; font-size:15px; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--fg); cursor:pointer; }
+  .bar { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; color:#fff; font-size:14px; font-weight:600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sustentación proyecto final</h1>
+  <p class="sub">Sábado 21 nov 2026, 8:00 am, 34-203. 10 min + 5 de preguntas. Funciona sin internet; las casillas se guardan en este navegador.</p>
+  <div class="bar"><button id="reset">Desmarcar todo</button><button onclick="document.getElementById('prompt').scrollIntoView()">Ir al prompt</button></div>
+
+  <h2>1. Verificado anoche (20 nov, 22:30)</h2>
+  <ul class="done">
+    <li><span>AWS CLI: cuenta 278835524469. GitHub CLI: sesión de sjunka activa.</span></li>
+    <li><span>Llave IAM de <code>github-cicd-votaciones</code> activa (último uso 20 nov). Secretos en GitHub: AWS, Docker Hub, Sonar, Discord.</span></li>
+    <li><span>Staging, producción, encuesta <code>/p/G8mR9uj4</code>, Pages y Lambda En vivo responden 200.</span></li>
+    <li><span>Producción y staging en <span class="pill" style="background:hsl(99 75% 42%)">v1.0.27</span>. Hay 7 releases.</span></li>
+    <li><span>Último deploy completo: 11 min con aprobación. Discord recibió el aviso.</span></li>
+    <li><span>PR 14 abierto, sin conflictos. Solo cambia <code>web/src/pages/Home.jsx</code>.</span></li>
+    <li><span>Guion y memofichas corregidos a v1.0.27 y "siete releases" (PR 26).</span></li>
+    <li><span>Dashboard de respaldo probado en http://localhost:4000.</span></li>
+  </ul>
+
+  <h2>2. Antes de entrar (7:00 a 7:45)</h2>
+  <ol data-group="antes">
+    <li><label><input type="checkbox"><span class="t">Portátil cargado, cargador, adaptador HDMI/USB-C. Celular cargado.</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Conectarse al Wi-Fi de EAFIT. Probar que abre https://github.com.</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Abrir Claude Code en la carpeta del curso y pegar el <b>prompt de la sección 6</b>. Esperar la tabla OK/FALLA.</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Si algo sale FALLA: leer el plan B (sección 4) antes de entrar.</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Chrome con las 11 pestañas. Discord abierto en el canal de avisos (iniciar sesión si lo pide).</span></label></li>
+    <li><label><input type="checkbox"><span class="t">En la pestaña PR 14: hay sesión de GitHub iniciada y se ve el botón verde de merge.</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Celular: abrir <a href="https://sjunka.github.io/votaciones-cicd/#/memofichas">memofichas</a> en horizontal.</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Modo No molestar en Mac y celular. Cerrar WhatsApp, correo y Slack.</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Zoom del navegador al 125 % en las pestañas que se proyectan (Cmd +).</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Ponerse de acuerdo con Valeria: quién merge, quién aprueba, quién lee cada parte.</span></label></li>
+  </ol>
+
+  <h2>3. En vivo: cuándo hacer cada cosa</h2>
+  <p class="sub">El minuto cuenta desde el merge. Hoy saldrá la <span class="pill" style="background:hsl(303 75% 42%)">v1.0.39</span> si nada más corre antes (la versión es el número del run). Producción pasa de verde a morado.</p>
+  <ol data-group="vivo">
+    <li><label class="key"><input type="checkbox"><span class="t"><span class="min">0:00</span><b>Al saludar: mergear PR 14.</b> En la pestaña PR 14, marcar "Merge without waiting for requirements to be met (bypass rules)", luego <b>Merge pull request</b> y <b>Confirm merge</b>. Respaldo en terminal: <code>gh pr merge 14 -R sjunka/votaciones-cicd --merge --admin</code></span></label></li>
+    <li><label><input type="checkbox"><span class="t"><span class="min">0:10</span>Mostrar la pestaña En vivo (y su QR al público). Debe aparecer el run nuevo "Merge pull request #14" en curso.</span></label></li>
+    <li><label><input type="checkbox"><span class="t"><span class="min">~3:00</span>Termina build-and-test (pruebas, Sonar, Trivy, imágenes a Docker Hub). Empieza deploy-staging.</span></label></li>
+    <li><label><input type="checkbox"><span class="t"><span class="min">~6:30</span>Staging desplegado; corre test-staging (Selenium, unos 30 s).</span></label></li>
+    <li><label class="key"><input type="checkbox"><span class="t"><span class="min">~7:00</span><b>APROBAR producción apenas aparezca "Esperando aprobación"</b> (cae en la parte de Evidencia del guion). En la pestaña Actions abrir el run, botón <b>Review deployments</b>, marcar <b>production</b>, <b>Approve and deploy</b>. También sirve el botón "Aprobar en GitHub" de la vista En vivo. No aprobar antes: el botón no existe hasta que test-staging pase.</span></label></li>
+    <li><label><input type="checkbox"><span class="t"><span class="min">~10:00</span>deploy-production y smoke tests terminan. Ya estamos en preguntas.</span></label></li>
+    <li><label class="key"><input type="checkbox"><span class="t"><span class="min">~10:30</span><b>Llega el aviso a Discord</b> con la Release v1.0.39. Mostrar Discord y refrescar producción: pastilla morada.</span></label></li>
+    <li><label><input type="checkbox"><span class="t"><span class="min">opcional</span>Botón de pánico, solo si sobra tiempo: pestaña panic-rollback, <b>Run workflow</b>, environment <b>production</b>, versión vacía, <b>Run workflow</b>. Unos 3 min; producción vuelve a v1.0.27 verde. Si no hay tiempo, mostrar el run 44344815777 ya hecho.</span></label></li>
+  </ol>
+
+  <h2>4. Plan B</h2>
+  <ul class="plain">
+    <li><b>No hay internet:</b> exponer con los diagramas y mostrar los runs de respaldo por captura o desde el celular con datos.</li>
+    <li><b>La vista En vivo no carga o se queda quieta:</b> usar la pestaña Actions o el dashboard http://localhost:4000 (en terminal: <code>node assignments/04-proyecto-final/votaciones-cicd/scripts/dashboard/server.mjs</code>).</li>
+    <li><b>No aparece "Review deployments" a los 8 min:</b> abrir el run en Actions y mirar qué job está rojo o en cola. Si un job falló, decirlo y mostrar el run 44348025068 (todo verde, 9:42).</li>
+    <li><b>Fallan los smoke tests en producción:</b> no es un error de la demo; el rollback automático corre solo. Explicarlo y mostrar el run 44340166676.</li>
+    <li><b>El botón de merge pide aprobación:</b> falta marcar la casilla de bypass. O usar el comando de la sección 3.</li>
+    <li><b>Discord no muestra el aviso:</b> el script nunca rompe el pipeline; mostrar el paso "Notify Discord" en el log de publish-release.</li>
+    <li><b>Preguntan por HTTPS:</b> CloudFront da HTTPS al usuario; el tramo CloudFront a ALB va en HTTP porque no hay dominio propio para el certificado.</li>
+  </ul>
+
+  <h2>5. Después de exponer</h2>
+  <ol data-group="despues">
+    <li><label><input type="checkbox"><span class="t">Publicar el foro DORA en Interactiva (vence hoy): <code>assignments/07-foro-dora/borrador-aporte.md</code>.</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Pedirle a Claude: "destruye la infraestructura del proyecto final según checkpoint.md paso 7" (AWS cuesta unos US$3 al día).</span></label></li>
+    <li><label><input type="checkbox"><span class="t">Actualizar <code>board.md</code> con la nota y cómo se entregó.</span></label></li>
+  </ol>
+
+  <h2 id="prompt">6. Prompt para Claude Code (pegar al llegar)</h2>
+  <div class="bar"><button id="copy">Copiar prompt</button><span id="copied" class="sub"></span></div>
+<pre id="prompttext">Hoy es la sustentación del proyecto final (8 am). No hay margen de error. Yo sigo leyendo el guion; tú dejas todo listo sin mergear ni aprobar nada (eso lo hago yo en vivo).
+
+1. Lee checkpoint.md y assignments/04-proyecto-final/checklist-manana.html.
+2. Verifica y repórtame en una tabla corta, OK o FALLA:
+   - aws sts get-caller-identity (cuenta 278835524469) y gh auth status.
+   - curl 200 a staging https://d1y5ajf6tjhnl7.cloudfront.net, producción https://d1ypwe0ox2c5in.cloudfront.net/p/G8mR9uj4, Pages https://sjunka.github.io/votaciones-cicd/ y la Lambda https://qxytkq2b4dkfxdbjpmrhzx2xh40wbrxf.lambda-url.us-east-1.on.aws/
+   - Versión en producción y staging (debe ser v1.0.27).
+   - PR 14 abierto y MERGEABLE; ningún run de ci-cd.yml en curso; número del último run (la versión de hoy será ese número + 1).
+   - Llave IAM de github-cicd-votaciones Active.
+3. Arranca el dashboard de respaldo en segundo plano: node assignments/04-proyecto-final/votaciones-cicd/scripts/dashboard/server.mjs (http://localhost:4000) y confirma que responde.
+4. Abre Chrome (extensión Claude in Chrome) y deja abiertas solo estas pestañas, en este orden:
+   1. https://sjunka.github.io/votaciones-cicd/ (presentación)
+   2. https://sjunka.github.io/votaciones-cicd/#/pipeline-vivo (En vivo)
+   3. https://github.com/sjunka/votaciones-cicd/pull/14
+   4. https://github.com/sjunka/votaciones-cicd/actions
+   5. https://d1y5ajf6tjhnl7.cloudfront.net (staging)
+   6. https://d1ypwe0ox2c5in.cloudfront.net/p/G8mR9uj4 (producción)
+   7. Discord: https://discord.com/channels/1573486609121415312/1573486610081906741 (servidor votaciones-cicd, canal #general). Si pide login o contraseña, avísame y espera.
+   8. https://github.com/sjunka/votaciones-cicd/actions/runs/44348025068 (respaldo: todo verde)
+   9. https://github.com/sjunka/votaciones-cicd/actions/runs/44340166676 (respaldo: rollback automático)
+   10. https://github.com/sjunka/votaciones-cicd/actions/workflows/panic-rollback.yml (botón de pánico)
+   11. http://localhost:4000 (dashboard de respaldo)
+   No cierres pestañas mías sin preguntar. Confirma que en la 1 cargan los diagramas, en la 2 aparece el último run y en la 3 se ve el botón de merge.
+5. Dime en una línea: la versión que saldrá hoy y su color de pastilla (tono = parche x 137 mod 360).
+6. Durante la exposición no hagas nada salvo que te lo pida. Si te pido ayuda: aprobar producción es gh api a pending_deployments del run activo (environment production, state approved).</pre>
+</main>
+<script>
+  const KEY = 'checklist-sustentacion';
+  const boxes = [...document.querySelectorAll('input[type=checkbox]')];
+  let saved = [];
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) {}
+  boxes.forEach((b, i) => {
+    b.checked = !!saved[i];
+    b.addEventListener('change', () => {
+      try { localStorage.setItem(KEY, JSON.stringify(boxes.map(x => x.checked))); } catch (e) {}
+    });
+  });
+  document.getElementById('reset').onclick = () => {
+    boxes.forEach(b => b.checked = false);
+    try { localStorage.removeItem(KEY); } catch (e) {}
+  };
+  document.getElementById('copy').onclick = async () => {
+    const t = document.getElementById('prompttext').textContent;
+    try { await navigator.clipboard.writeText(t); document.getElementById('copied').textContent = 'Copiado'; }
+    catch (e) { getSelection().selectAllChildren(document.getElementById('prompttext')); document.getElementById('copied').textContent = 'Seleccionado: Cmd+C'; }
+  };
+</script>
+</body>
+</html>
